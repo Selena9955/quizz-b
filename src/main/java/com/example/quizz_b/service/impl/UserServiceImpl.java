@@ -46,6 +46,5 @@ public class UserServiceImpl implements UserService {
             user.setRole(UserRole.USER);
 
             userRepository.save(user);
-
         }
 }

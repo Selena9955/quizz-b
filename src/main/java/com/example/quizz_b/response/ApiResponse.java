@@ -12,7 +12,7 @@ public class ApiResponse<T> {
     private String message; // 訊息 例如: 查詢成功, 新增成功, 請求錯誤
     private T data; 	    // payload 實際資料
 
-    // 成功回應
+	// 成功回應
     public static <T> ApiResponse<T> success(String message, T data) {
         return new ApiResponse<T>(200, message, data);
     }
