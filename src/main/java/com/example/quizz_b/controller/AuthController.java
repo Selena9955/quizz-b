@@ -5,10 +5,9 @@ import com.example.quizz_b.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Controller
 @RequestMapping("/auth")
@@ -16,6 +15,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AuthController {
     @Autowired
     private UserService userService;
+
+    @GetMapping("/check-email")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkEmail(@RequestParam String email) {
+        boolean available = !userService.isEmailRegistered(email);
+        Map<String, Boolean> result = Map.of("available", available);
+
+        return ResponseEntity.ok(ApiResponse.success("查詢成功", result));
+    }
+
+    @GetMapping("/check-username")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkUsername(@RequestParam String username) {
+        boolean available = !userService.isUsernameTaken(username);
+        Map<String, Boolean> result = Map.of("available", available);
+
+        return ResponseEntity.ok(ApiResponse.success("查詢成功", result));
+    }
+
 
     // 註冊 http://localhost:8081/auth/register
     @PostMapping("/register")

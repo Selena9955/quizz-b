@@ -47,4 +47,16 @@ public class UserServiceImpl implements UserService {
 
             userRepository.save(user);
         }
+
+    @Override
+    public boolean isEmailRegistered(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    @Override
+    public boolean isUsernameTaken(String username) {
+        return userRepository.findByUsername(username).isPresent();
+    }
+
+
 }
