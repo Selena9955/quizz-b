@@ -1,7 +1,9 @@
 package com.example.quizz_b.controller;
 
+import com.example.quizz_b.model.dto.UserDto;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.UserService;
+import com.example.quizz_b.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -47,4 +49,18 @@ public class AuthController {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
     }
+
+    // 登入 http://localhost:8081/auth/login
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse< Map<String, Object>>> login( @RequestParam String email,
+                                                    @RequestParam String password){
+        try {
+            Map<String, Object> result = userService.login(email, password);
+            return ResponseEntity.ok(ApiResponse.success("登入成功", result));
+        }catch (RuntimeException ex){
+            return ResponseEntity.badRequest().body(ApiResponse.error(401,"登入失敗:"+ex.getMessage()));
+        }
+    }
+
+
 }
