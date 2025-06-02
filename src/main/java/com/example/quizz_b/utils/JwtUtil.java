@@ -24,7 +24,7 @@ public class JwtUtil {
 
     private Key key;
 
-    private final long EXPIRATION = 1000 * 60 * 60; // 1小時
+    private final long EXPIRATION = 1000 * 60 * 60 * 24; // 24 hr
 
     public Key getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);

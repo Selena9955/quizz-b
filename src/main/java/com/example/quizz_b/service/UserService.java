@@ -52,14 +52,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public boolean isEmailRegistered(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
-
-    public boolean isUsernameTaken(String username) {
-        return userRepository.findByUsername(username).isPresent();
-    }
-
     public Map<String, Object> login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("使用者不存在"));
@@ -75,6 +67,20 @@ public class UserService {
         result.put("token", token);
         result.put("user", dto);
         return result;
+    }
+
+    public UserDto findByemail(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("使用者不存在"));
+        return  convertToDto(user);
+    }
+
+    public boolean isEmailRegistered(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    public boolean isUsernameTaken(String username) {
+        return userRepository.findByUsername(username).isPresent();
     }
 
     private UserDto convertToDto(User user) {
