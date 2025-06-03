@@ -1,7 +1,7 @@
 package com.example.quizz_b.controller;
 
+import com.example.quizz_b.model.dto.RegisterRequestDto;
 import com.example.quizz_b.model.dto.UserDto;
-import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.repository.UserRepository;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.UserService;
@@ -19,12 +19,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/auth")
 @CrossOrigin(origins = {"http://localhost:5173"}, allowCredentials = "true")
 public class AuthController {
     @Autowired
     private UserService userService;
+
 
     @Autowired
     private UserRepository userRepository;
@@ -32,8 +33,9 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @GetMapping("/check-email")
-    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkEmail(@RequestParam String email) {
+    @PostMapping("/check-email")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkEmail(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
         boolean available = !userService.isEmailRegistered(email);
         Map<String, Boolean> result = Map.of("available", available);
 
@@ -51,20 +53,21 @@ public class AuthController {
 
     // 註冊 http://localhost:8081/auth/register
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Void>> register(
-            @RequestParam String username,
-            @RequestParam String email,
-            @RequestParam String password) {
-
+    public ResponseEntity<ApiResponse<Map<String,String>>> register(@RequestBody RegisterRequestDto request) {
         try {
-            userService.createUser(username, password, email);
-            return ResponseEntity.ok(ApiResponse.success("註冊成功", null));
+            // 用 RegisterRequestDto 檢查是格式
+            userService.createUser(
+                    request.getUsername(),
+                    request.getPassword(),
+                    request.getEmail()
+            );
+            Map<String, String> data = Map.of("email", request.getEmail());
+            return ResponseEntity.ok(ApiResponse.success("註冊成功", data));
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
     }
 
-    // 登入 http://localhost:8081/auth/login
     @PostMapping("/login")
     public ResponseEntity<ApiResponse< Map<String, Object>>> login( @RequestBody Map<String, String> body, HttpServletResponse response){
         try {
@@ -117,7 +120,7 @@ public class AuthController {
                     try {
                         // 解析 JWT 拿到 email
                         String email = jwtUtil.extractEmail(jwt);
-                        UserDto userDto = userService.findByemail(email);
+                        UserDto userDto = userService.findByEmail(email);
 
                         return ResponseEntity.ok(Map.of("user", userDto));
                     } catch (Exception e) {
@@ -135,5 +138,29 @@ public class AuthController {
                 .body(Map.of("message", "未登入"));
     }
 
+    @PostMapping("/send-verify-code")
+    public ResponseEntity<ApiResponse<Void>> sendVerifyCode(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+
+        try {
+            userService.sendVerificationCode(email);
+            return ResponseEntity.ok(ApiResponse.success("驗證碼已發送，請勿關閉本視窗", null));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/check-verify-code")
+    public ResponseEntity<ApiResponse<Void>> checkVerifyCode(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String code = body.get("code");
+
+        try {
+            userService.checkVerificationCode(email,code);
+            return ResponseEntity.ok(ApiResponse.success("email驗證成功", null));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, ex.getMessage()));
+        }
+    }
 
 }

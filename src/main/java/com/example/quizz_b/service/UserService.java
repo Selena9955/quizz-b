@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +20,8 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -69,7 +73,7 @@ public class UserService {
         return result;
     }
 
-    public UserDto findByemail(String email){
+    public UserDto findByEmail(String email){
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("使用者不存在"));
         return  convertToDto(user);
@@ -81,6 +85,38 @@ public class UserService {
 
     public boolean isUsernameTaken(String username) {
         return userRepository.findByUsername(username).isPresent();
+    }
+
+    public void sendVerificationCode(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("使用者不存在"));
+
+        String code = String.valueOf((int)(Math.random() * 900000) + 100000); // 六位數
+        user.setVerificationCode(code);
+        user.setCodeGeneratedAt(LocalDateTime.now());
+        userRepository.save(user);
+        String body = String.format("""
+        歡迎註冊 Quizz 會員
+
+        您的驗證碼為：%s
+
+        """, code);
+
+        emailService.send(email, "歡迎註冊 Quizz 會員", body);
+    }
+    public void checkVerificationCode(String email,String code){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("使用者不存在"));
+        String verificationCode = user.getVerificationCode();
+        if (verificationCode == null || !verificationCode.equals(code)) {
+            throw new RuntimeException("驗證碼錯誤");
+        }
+        if (user.getCodeGeneratedAt() == null ||
+                Duration.between(user.getCodeGeneratedAt(), LocalDateTime.now()).toMinutes() > 10) {
+            throw new RuntimeException("驗證碼已過期");
+        }
+        user.setStatus(UserStatus.VERIFIED);
+        userRepository.save(user);
     }
 
     private UserDto convertToDto(User user) {

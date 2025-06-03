@@ -44,5 +44,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role = UserRole.USER;
 
+    private String verificationCode;
 
+    private LocalDateTime codeGeneratedAt;
 }
