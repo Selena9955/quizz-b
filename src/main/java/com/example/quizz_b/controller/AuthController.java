@@ -10,6 +10,7 @@ import com.example.quizz_b.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,6 @@ import java.util.Map;
 public class AuthController {
     @Autowired
     private UserService userService;
-
 
     @Autowired
     private UserRepository userRepository;
@@ -51,10 +51,8 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("查詢成功", result));
     }
 
-
-    // 註冊 http://localhost:8081/auth/register
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Map<String,String>>> register(@RequestBody RegisterRequestDto request) {
+    public ResponseEntity<ApiResponse<Map<String,String>>> register(@Valid @RequestBody RegisterRequestDto request) {
         try {
             // 用 RegisterRequestDto 檢查是格式
             userService.createUser(
