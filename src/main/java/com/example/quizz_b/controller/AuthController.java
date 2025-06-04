@@ -1,5 +1,6 @@
 package com.example.quizz_b.controller;
 
+import com.example.quizz_b.constant.enums.UserStatus;
 import com.example.quizz_b.model.dto.RegisterRequestDto;
 import com.example.quizz_b.model.dto.UserDto;
 import com.example.quizz_b.repository.UserRepository;
@@ -14,9 +15,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -75,21 +76,31 @@ public class AuthController {
             String password = body.get("password");
             Map<String, Object> result = userService.login(email, password);
 
-            // 取出 token，設 Cookie
             String token = (String) result.get("token");
-            ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                    .httpOnly(true)
-                    .secure(false) // https 本地測試用 false，正式環境改 true
-                    .path("/") // 網域範圍為全部
-                    .maxAge(24 * 60 * 60) // Cookie 的存活時間 - 24hr
-                    .sameSite("Lax") // 防止跨站請求偽造（CSRF）的一種設定
-                    .build(); // 完成，建立 Cookie
-            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            UserDto user = (UserDto) result.get("user");
 
-            // 回傳時不包含 token，只回 user
-            result.remove("token");
 
-            return ResponseEntity.ok(ApiResponse.success("登入成功", result));
+            boolean isVerified = user.getStatus() == UserStatus.VERIFIED;
+
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("isVerified", isVerified);
+            responseData.put("email", user.getEmail());
+
+            // 設 Cookie
+            if (isVerified) {
+                ResponseCookie cookie = ResponseCookie.from("jwt", token)
+                        .httpOnly(true)
+                        .secure(false) // https 本地測試用 false，正式環境改 true
+                        .path("/") // 網域範圍為全部
+                        .maxAge(24 * 60 * 60) // Cookie 的存活時間 - 24hr
+                        .sameSite("Lax") // 防止跨站請求偽造（CSRF）的一種設定
+                        .build(); // 完成，建立 Cookie
+                response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+                // 有驗證才提供user資料
+                responseData.put("user", user);
+            }
+            return ResponseEntity.ok(ApiResponse.success("登入成功", responseData));
         }catch (RuntimeException ex){
             return ResponseEntity.badRequest().body(ApiResponse.error(401,"登入失敗:"+ex.getMessage()));
         }
@@ -140,9 +151,8 @@ public class AuthController {
 
     @PostMapping("/send-verify-code")
     public ResponseEntity<ApiResponse<Void>> sendVerifyCode(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-
         try {
+            String email = body.get("email");
             userService.sendVerificationCode(email);
             return ResponseEntity.ok(ApiResponse.success("驗證碼已發送，請勿關閉本視窗", null));
         } catch (RuntimeException ex) {
@@ -152,10 +162,9 @@ public class AuthController {
 
     @PostMapping("/check-verify-code")
     public ResponseEntity<ApiResponse<Void>> checkVerifyCode(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String code = body.get("code");
-
         try {
+            String email = body.get("email");
+            String code = body.get("code");
             userService.checkVerificationCode(email,code);
             return ResponseEntity.ok(ApiResponse.success("email驗證成功", null));
         } catch (RuntimeException ex) {
