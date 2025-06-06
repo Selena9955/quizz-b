@@ -16,7 +16,7 @@ public class TagService {
 
     public List<TagDto> getAllTags(){
         List<Tag> tags = tagRepository.findAll();
-        return tags.stream().map(this::convertToDTO).collect(Collectors.toList());
+        return tags.stream().map(this::convertToDTO).toList();
     }
 
     private TagDto convertToDTO(Tag tag){

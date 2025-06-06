@@ -24,7 +24,6 @@ public class ArticleService {
 
     @Transactional
     public void create(ArticleCreateRequestDto request) {
-        System.out.println("收到請求：" + request);
         Set<Tag> tags  = request.getTags().stream()
                 .map(tagName -> {
                     tagName = tagName.trim().toLowerCase();
@@ -48,5 +47,22 @@ public class ArticleService {
         article.setTags(tags);
 
         articleRepository.save(article);
+    }
+
+    public List<ArticleDto> getAllArticles() {
+        List<Article> articles = articleRepository.findAll();
+        return articles.stream().map(this::convertToDTO).toList();
+
+    }
+
+    private ArticleDto convertToDTO(Article article){
+        ArticleDto dto = new ArticleDto();
+        dto.setId(article.getId());
+        dto.setCreateTime(article.getCreateTime());
+        dto.setUpdateTime(article.getUpdateTime());
+        dto.setTitle(article.getTitle());
+        dto.setContent(article.getContent());
+
+        return dto;
     }
 }
