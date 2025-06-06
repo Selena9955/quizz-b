@@ -32,7 +32,16 @@ public class ArticleController {
     public ResponseEntity<ApiResponse<List<ArticleDto>>> getAllArticle() {
         try{
             List<ArticleDto> articles =  articleService.getAllArticles();
-            return ResponseEntity.ok(ApiResponse.success("新增成功", articles));
+            return ResponseEntity.ok(ApiResponse.success("取得成功", articles));
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
+        }
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ArticleDto>> getArticle(@PathVariable Long id) {
+        try{
+            ArticleDto articles =  articleService.getById(id);
+            return ResponseEntity.ok(ApiResponse.success("取得成功", articles));
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }

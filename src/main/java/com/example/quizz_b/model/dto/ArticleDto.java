@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -17,5 +17,5 @@ public class ArticleDto {
     private LocalDateTime updateTime;
     private String title;
     private String content;
-    private Set<TagDto> tags = new HashSet<>();
+    private List<String> tags = new ArrayList<>();
 }

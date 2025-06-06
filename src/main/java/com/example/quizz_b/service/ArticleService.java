@@ -52,7 +52,12 @@ public class ArticleService {
     public List<ArticleDto> getAllArticles() {
         List<Article> articles = articleRepository.findAll();
         return articles.stream().map(this::convertToDTO).toList();
+    }
 
+    @Transactional
+    public ArticleDto getById(Long id) {
+        Article article = articleRepository.findById(id).orElseThrow(() -> new RuntimeException("找不到指定的文章"));
+        return convertToDTO(article);
     }
 
     private ArticleDto convertToDTO(Article article){
@@ -63,6 +68,9 @@ public class ArticleService {
         dto.setTitle(article.getTitle());
         dto.setContent(article.getContent());
 
+        List<String> tagNames = article.getTags().stream().map(Tag::getName).toList();
+        dto.setTags(tagNames);
         return dto;
     }
 }
+
