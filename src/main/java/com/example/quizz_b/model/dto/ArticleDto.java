@@ -13,6 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class ArticleDto {
     private Long id;
+    private LocalDateTime createTime;
     private LocalDateTime updateTime;
     private String title;
     private String content;

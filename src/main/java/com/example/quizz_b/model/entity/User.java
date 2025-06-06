@@ -24,7 +24,7 @@ public class User {
 
     @CreationTimestamp
     @Column(name = "create_time", updatable = false)
-    private LocalDateTime createDate;
+    private LocalDateTime createTime;
 
     @UpdateTimestamp
     @Column(name = "update_time")
