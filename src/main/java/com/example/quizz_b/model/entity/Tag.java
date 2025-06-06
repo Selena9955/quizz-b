@@ -37,7 +37,7 @@ public class Tag {
     private Set<Article> articles = new HashSet<>();
 
     @ManyToMany(mappedBy = "tags")
-    private Set<Problem> problems = new HashSet<>();
+    private Set<Quiz> quizzes = new HashSet<>();
 
     @Column(nullable = false)
     private long countArticle = 0;

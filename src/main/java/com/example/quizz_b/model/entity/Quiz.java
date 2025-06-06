@@ -16,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name="articles")
-public class Problem {
+public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,8 +38,8 @@ public class Problem {
 
     @ManyToMany
     @JoinTable(
-            name = "problem_tags",
-            joinColumns = @JoinColumn(name = "problem_id"),
+            name = "quiz_tags",
+            joinColumns = @JoinColumn(name = "quiz_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags = new HashSet<>();
