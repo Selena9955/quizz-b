@@ -15,7 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="articles")
+@Table(name="quiz")
 public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,4 +43,8 @@ public class Quiz {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User author;
 }

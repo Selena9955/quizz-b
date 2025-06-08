@@ -19,7 +19,7 @@ public class TagController {
     private TagService tagService;
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<TagDto>>> getArticles() {
+    public ResponseEntity<ApiResponse<List<TagDto>>> getTags() {
             try{
                 List<TagDto> result= tagService.getAllTags();
                 return ResponseEntity.ok(ApiResponse.success("取得成功", result));

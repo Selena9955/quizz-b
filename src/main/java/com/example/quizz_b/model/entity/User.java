@@ -11,6 +11,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -52,4 +54,10 @@ public class User {
 
     @Column(name = "code_generated_at")
     private LocalDateTime codeGeneratedAt;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    private List<Article> articles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    private List<Quiz> quizzes = new ArrayList<>();
 }

@@ -43,4 +43,8 @@ public class Article {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User author;
 }
