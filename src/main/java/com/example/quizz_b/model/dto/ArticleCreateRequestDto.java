@@ -8,5 +8,6 @@ import java.util.List;
 public class ArticleCreateRequestDto {
     private String title;
     private String content;
+    private String previewContent;
     private List<String> tags;
 }

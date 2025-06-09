@@ -4,6 +4,7 @@ import com.example.quizz_b.model.dto.ArticleCreateRequestDto;
 import com.example.quizz_b.model.dto.ArticleDto;
 import com.example.quizz_b.model.entity.Article;
 import com.example.quizz_b.model.entity.Tag;
+import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.repository.ArticleRepository;
 import com.example.quizz_b.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class ArticleService {
     private TagRepository tagRepository;
 
     @Transactional
-    public void create(ArticleCreateRequestDto request) {
+    public void create(ArticleCreateRequestDto request, User user) {
         Set<Tag> tags  = request.getTags().stream()
                 .map(tagName -> {
                     tagName = tagName.trim().toLowerCase();
@@ -44,7 +45,9 @@ public class ArticleService {
         Article article = new Article();
         article.setTitle(request.getTitle());
         article.setContent(request.getContent());
+        article.setPreviewContent(request.getPreviewContent());
         article.setTags(tags);
+        article.setAuthor(user);
 
         articleRepository.save(article);
     }
@@ -63,10 +66,12 @@ public class ArticleService {
     private ArticleDto convertToDTO(Article article){
         ArticleDto dto = new ArticleDto();
         dto.setId(article.getId());
+        dto.setUserId(article.getAuthor().getId());
         dto.setCreateTime(article.getCreateTime());
         dto.setUpdateTime(article.getUpdateTime());
         dto.setTitle(article.getTitle());
         dto.setContent(article.getContent());
+        dto.setPreviewContent(article.getPreviewContent());
 
         List<String> tagNames = article.getTags().stream().map(Tag::getName).toList();
         dto.setTags(tagNames);

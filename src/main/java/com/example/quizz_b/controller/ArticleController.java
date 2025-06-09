@@ -21,6 +21,7 @@ public class ArticleController {
     @PostMapping("")
     public ResponseEntity<ApiResponse<Void>> createArticle(@Valid @RequestBody ArticleCreateRequestDto body) {
             try{
+
                 articleService.create(body);
                 return ResponseEntity.ok(ApiResponse.success("新增成功", null));
             } catch (Exception ex) {

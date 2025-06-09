@@ -13,9 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 public class ArticleDto {
     private Long id;
+    private Long userId;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
     private String title;
     private String content;
+    private String previewContent;
     private List<String> tags = new ArrayList<>();
 }

@@ -36,6 +36,10 @@ public class Article {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Lob
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String PreviewContent;
+
     @ManyToMany
     @JoinTable(
             name = "article_tags",
