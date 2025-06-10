@@ -129,7 +129,7 @@ public class AuthController {
                     try {
                         // 解析 JWT 拿到 email
                         String email = jwtUtil.extractEmail(jwt);
-                        UserDto userDto = userService.findByEmail(email);
+                        UserDto userDto = userService.getUserDtoByEmail(email);
 
                         return ResponseEntity.ok(Map.of("user", userDto));
                     } catch (Exception e) {

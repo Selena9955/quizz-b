@@ -2,8 +2,12 @@ package com.example.quizz_b.controller;
 
 import com.example.quizz_b.model.dto.ArticleCreateRequestDto;
 import com.example.quizz_b.model.dto.ArticleDto;
+import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.ArticleService;
+import com.example.quizz_b.service.UserService;
+import com.example.quizz_b.utils.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +21,19 @@ import java.util.Map;
 public class ArticleController {
     @Autowired
     private ArticleService articleService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("")
-    public ResponseEntity<ApiResponse<Void>> createArticle(@Valid @RequestBody ArticleCreateRequestDto body) {
+    public ResponseEntity<ApiResponse<Void>> createArticle(@Valid @RequestBody ArticleCreateRequestDto body, HttpServletRequest request) {
             try{
+                String token = jwtUtil.extractTokenFromRequest(request);
+                Long userId = jwtUtil.extractUserId(token);
+                User user = userService.getById(userId);
 
-                articleService.create(body);
+                articleService.create(body,user);
                 return ResponseEntity.ok(ApiResponse.success("新增成功", null));
             } catch (Exception ex) {
                 return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));

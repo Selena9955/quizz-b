@@ -73,8 +73,19 @@ public class UserService {
         return result;
     }
 
-    public UserDto findByEmail(String email){
+    public UserDto getUserDtoByEmail(String email){
         User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("使用者不存在"));
+        return  convertToDto(user);
+    }
+
+    public User getById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("使用者不存在"));
+    }
+
+    public UserDto getUserDtoById(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("使用者不存在"));
         return  convertToDto(user);
     }
@@ -138,4 +149,6 @@ public class UserService {
         user.setRole(dto.getRole());
         return user;
     }
+
+
 }
