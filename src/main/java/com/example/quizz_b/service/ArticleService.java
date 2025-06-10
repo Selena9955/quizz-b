@@ -1,7 +1,9 @@
 package com.example.quizz_b.service;
 
 import com.example.quizz_b.model.dto.ArticleCreateRequestDto;
-import com.example.quizz_b.model.dto.ArticleDto;
+import com.example.quizz_b.model.dto.ArticleDetailDto;
+import com.example.quizz_b.model.dto.ArticleListDto;
+import com.example.quizz_b.model.dto.AuthorDto;
 import com.example.quizz_b.model.entity.Article;
 import com.example.quizz_b.model.entity.Tag;
 import com.example.quizz_b.model.entity.User;
@@ -52,30 +54,58 @@ public class ArticleService {
         articleRepository.save(article);
     }
 
-    public List<ArticleDto> getAllArticles() {
+    public List<ArticleListDto> getAllArticles() {
         List<Article> articles = articleRepository.findAll();
-        return articles.stream().map(this::convertToDTO).toList();
+        return articles.stream().map(this::convertToListDTO).toList();
     }
 
     @Transactional
-    public ArticleDto getById(Long id) {
+    public ArticleDetailDto getById(Long id) {
         Article article = articleRepository.findById(id).orElseThrow(() -> new RuntimeException("找不到指定的文章"));
-        return convertToDTO(article);
+        return convertToDetailDTO(article);
     }
 
-    private ArticleDto convertToDTO(Article article){
-        ArticleDto dto = new ArticleDto();
+    public void delete(Long articleId, Long userId) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new RuntimeException("找不到文章"));
+
+        if (!article.getAuthor().getId().equals(userId)) {
+            throw new RuntimeException("無權限刪除此文章");
+        }
+
+        articleRepository.delete(article);
+    }
+
+    public ArticleListDto convertToListDTO(Article article) {
+        ArticleListDto dto = new ArticleListDto();
         dto.setId(article.getId());
-        dto.setUserId(article.getAuthor().getId());
-        dto.setCreateTime(article.getCreateTime());
-        dto.setUpdateTime(article.getUpdateTime());
         dto.setTitle(article.getTitle());
-        dto.setContent(article.getContent());
         dto.setPreviewContent(article.getPreviewContent());
+        dto.setCreateTime(article.getCreateTime());
+
+        AuthorDto authorDto = new AuthorDto(article.getAuthor().getId(), article.getAuthor().getUsername());
+        dto.setAuthor(authorDto);
 
         List<String> tagNames = article.getTags().stream().map(Tag::getName).toList();
         dto.setTags(tagNames);
         return dto;
     }
+
+    private ArticleDetailDto convertToDetailDTO(Article article){
+        ArticleDetailDto dto = new ArticleDetailDto();
+        dto.setId(article.getId());
+        dto.setTitle(article.getTitle());
+        dto.setContent(article.getContent());
+        dto.setCreateTime(article.getCreateTime());
+        dto.setUpdateTime(article.getUpdateTime());
+
+        AuthorDto authorDto = new AuthorDto(article.getAuthor().getId(), article.getAuthor().getUsername());
+        dto.setAuthor(authorDto);
+
+        List<String> tagNames = article.getTags().stream().map(Tag::getName).toList();
+        dto.setTags(tagNames);
+        return dto;
+    }
+
 }
 

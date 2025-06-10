@@ -1,7 +1,8 @@
 package com.example.quizz_b.controller;
 
 import com.example.quizz_b.model.dto.ArticleCreateRequestDto;
-import com.example.quizz_b.model.dto.ArticleDto;
+import com.example.quizz_b.model.dto.ArticleDetailDto;
+import com.example.quizz_b.model.dto.ArticleListDto;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.ArticleService;
@@ -11,10 +12,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/articles")
@@ -40,20 +41,34 @@ public class ArticleController {
             }
     }
 
+    @Transactional
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<ArticleDto>>> getAllArticle() {
+    public ResponseEntity<ApiResponse<List<ArticleListDto>>> getAllArticle() {
         try{
-            List<ArticleDto> articles =  articleService.getAllArticles();
+            List<ArticleListDto> articles =  articleService.getAllArticles();
             return ResponseEntity.ok(ApiResponse.success("取得成功", articles));
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
     }
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ArticleDto>> getArticle(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ArticleDetailDto>> getArticle(@PathVariable Long id) {
         try{
-            ArticleDto articles =  articleService.getById(id);
+            ArticleDetailDto articles =  articleService.getById(id);
             return ResponseEntity.ok(ApiResponse.success("取得成功", articles));
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteArticle(@PathVariable Long id, HttpServletRequest request){
+        try{
+            String token = jwtUtil.extractTokenFromRequest(request);
+            Long userId = jwtUtil.extractUserId(token);
+
+            articleService.delete(id,userId);
+            return ResponseEntity.ok(ApiResponse.success("刪除成功", null));
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
