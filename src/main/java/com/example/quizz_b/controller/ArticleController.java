@@ -73,4 +73,18 @@ public class ArticleController {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
     }
+
+    @PutMapping("/{id}/edit")
+    public ResponseEntity<ApiResponse<Void>> updateArticle(@Valid @RequestBody ArticleCreateRequestDto body, @PathVariable Long id, HttpServletRequest request) {
+        try{
+            String token = jwtUtil.extractTokenFromRequest(request);
+            Long userId = jwtUtil.extractUserId(token);
+            User user = userService.getById(userId);
+
+            articleService.update(id,body,user);
+            return ResponseEntity.ok(ApiResponse.success("新增成功", null));
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
+        }
+    }
 }

@@ -9,6 +9,7 @@ import com.example.quizz_b.model.entity.Tag;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.repository.ArticleRepository;
 import com.example.quizz_b.repository.TagRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,6 +77,38 @@ public class ArticleService {
         articleRepository.delete(article);
     }
 
+    public void update(Long articleId, @Valid ArticleCreateRequestDto body, User user) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new RuntimeException("文章不存在"));
+
+        if (!article.getAuthor().getId().equals(user.getId())) {
+            throw new RuntimeException("無權限修改這篇文章");
+        }
+        Set<Tag> tags  = body.getTags().stream()
+                .map(tagName -> {
+                            tagName = tagName.trim().toLowerCase();
+                            Tag tag = tagRepository.findByName(tagName).orElse(null);
+                            if (tag == null) {
+                                tag = new Tag();
+                                tag.setName(tagName);
+                                tag.setCountArticle(1);
+                                tag = tagRepository.save(tag);
+                            } else {
+                                tag.setCountArticle(tag.getCountArticle() + 1);
+                                tag = tagRepository.save(tag);
+                            }
+                            return tag;
+                        }
+                ).collect(Collectors.toSet());
+
+        article.setTitle(body.getTitle());
+        article.setContent(body.getContent());
+        article.setPreviewContent(body.getPreviewContent());
+        article.setTags(tags);
+
+        articleRepository.save(article);
+    }
+
     public ArticleListDto convertToListDTO(Article article) {
         ArticleListDto dto = new ArticleListDto();
         dto.setId(article.getId());
@@ -106,6 +139,7 @@ public class ArticleService {
         dto.setTags(tagNames);
         return dto;
     }
+
 
 }
 
