@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -34,7 +35,7 @@ public class Quiz {
 
     @Lob
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
+    private String titleDetail;
 
     @ManyToMany
     @JoinTable(
@@ -47,4 +48,16 @@ public class Quiz {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
+
+    // 選項-所有題型共用
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuizOption> options;
+
+    // 解答-單選題、簡答題
+    private String correctAnswer;
+
+    // 解答-多選題
+    @ElementCollection
+    private List<String> correctAnswers;
+
 }
