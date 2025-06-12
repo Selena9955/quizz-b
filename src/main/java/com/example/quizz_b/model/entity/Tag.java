@@ -43,7 +43,7 @@ public class Tag {
     private long countArticle = 0;
 
     @Column(nullable = false)
-    private long countProblem = 0;
+    private long countQuizzes= 0;
 
     // 處理 Set 內的資料 在 stream 中修改時造成的 ConcurrentModificationException
     @Override

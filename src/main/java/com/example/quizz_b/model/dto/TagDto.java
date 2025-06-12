@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class TagDto {
     private Long id;
     private String name;
-    private long countArticle = 0;
-    private long countProblem = 0;
+    private long countArticles = 0;
+    private long countQuizzes = 0;
 }

@@ -1,5 +1,6 @@
 package com.example.quizz_b.model.entity;
 
+import com.example.quizz_b.constant.enums.QuizType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,11 +31,14 @@ public class Quiz {
     @Column(name = "update_time")
     private LocalDateTime updateTime;
 
+    @Enumerated(EnumType.ORDINAL)
+    private QuizType quizType;
+
     @Column(nullable = false)
     private String title;
 
     @Lob
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String titleDetail;
 
     @ManyToMany
@@ -49,15 +53,22 @@ public class Quiz {
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
 
-    // 選項-所有題型共用
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    // 選項-單選題、多選題
+    @ElementCollection
+    @CollectionTable(name = "quiz_options", joinColumns = @JoinColumn(name = "quiz_id"))
     private List<QuizOption> options;
 
-    // 解答-單選題、簡答題
-    private String correctAnswer;
+    // 解答-單選題
+    private String singleAnswerId;
 
     // 解答-多選題
     @ElementCollection
-    private List<String> correctAnswers;
+    @CollectionTable(name = "quiz_multiple_answer", joinColumns = @JoinColumn(name = "quiz_id"))
+    private List<String> multipleAnswerId;
+
+    // 解答-記憶題
+    private String flashAnswer;
+
+    private String answerDetail;
 
 }

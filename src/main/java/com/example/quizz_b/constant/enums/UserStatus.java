@@ -15,7 +15,7 @@ public enum UserStatus {
         return code;
     }
 
-    // 可選：根據 code 反查 enum
+    // 根據 code 反查 enum
     public static UserStatus fromCode(int code) {
         for (UserStatus status : UserStatus.values()) {
             if (status.getCode() == code) {
