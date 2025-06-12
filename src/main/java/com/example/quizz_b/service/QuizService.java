@@ -2,6 +2,7 @@ package com.example.quizz_b.service;
 
 import com.example.quizz_b.constant.enums.QuizType;
 import com.example.quizz_b.factory.quiz.QuizHandlerFactory;
+import com.example.quizz_b.model.dto.QuizListDto;
 import com.example.quizz_b.model.dto.QuizSubmitRequestDto;
 import com.example.quizz_b.model.entity.Quiz;
 import com.example.quizz_b.model.entity.Tag;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -45,5 +47,27 @@ public class QuizService {
         quiz.setTags(tags);
 
         quizRepository.save(quiz);
+    }
+
+    @Transactional
+    public List<QuizListDto> getAllQuizzes() {
+        List<Quiz> quizzes = quizRepository.findAllByOrderByCreateTimeDesc();
+        return quizzes.stream().map(this::convertToListDTO).toList();
+    }
+
+    public QuizListDto convertToListDTO(Quiz quiz) {
+        QuizListDto dto = new QuizListDto();
+        dto.setId(quiz.getId());
+        dto.setAuthorName(quiz.getAuthor().getUsername());
+        dto.setQuizType(quiz.getQuizType().ordinal());
+        dto.setTitle(quiz.getTitle());
+
+        List<String> tagNames = quiz.getTags()
+                .stream()
+                .map(Tag::getName)
+                .toList();
+        dto.setTags(tagNames);
+
+        return dto;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.quizz_b.controller;
 
+import com.example.quizz_b.model.dto.QuizListDto;
 import com.example.quizz_b.model.dto.QuizSubmitRequestDto;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.response.ApiResponse;
@@ -9,10 +10,9 @@ import com.example.quizz_b.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/quizzes")
@@ -34,6 +34,16 @@ public class QuizController {
 
             quizService.create(dto,user);
             return ResponseEntity.ok(ApiResponse.success("新增成功", null));
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<QuizListDto>>> getAllQuizzes(){
+        try{
+            List<QuizListDto> listDtos =  quizService.getAllQuizzes();
+            return ResponseEntity.ok(ApiResponse.success("取得成功", listDtos));
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
