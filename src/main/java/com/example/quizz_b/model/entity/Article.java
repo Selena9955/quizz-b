@@ -1,9 +1,7 @@
 package com.example.quizz_b.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,14 +9,18 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name="articles")
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @CreationTimestamp
@@ -29,6 +31,7 @@ public class Article {
     @Column(name = "update_time")
     private LocalDateTime updateTime;
 
+    @ToString.Include
     @Column(nullable = false)
     private String title;
 
@@ -40,6 +43,7 @@ public class Article {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String PreviewContent;
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "article_tags",
@@ -48,6 +52,7 @@ public class Article {
     )
     private Set<Tag> tags = new HashSet<>();
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User author;

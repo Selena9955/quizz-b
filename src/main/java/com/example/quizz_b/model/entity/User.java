@@ -4,9 +4,7 @@ import com.example.quizz_b.constant.enums.UserRole;
 import com.example.quizz_b.constant.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,14 +12,18 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name="users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @CreationTimestamp
@@ -32,6 +34,7 @@ public class User {
     @Column(name = "update_time")
     private LocalDateTime updateTime;
 
+    @ToString.Include
     @Column(length = 50,  nullable = false,unique = true)
     @Size(min = 2, message = "用戶名長度至少 2 個字")
     private String username;
@@ -55,9 +58,11 @@ public class User {
     @Column(name = "code_generated_at")
     private LocalDateTime codeGeneratedAt;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Article> articles = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Quiz> quizzes = new ArrayList<>();
 }
