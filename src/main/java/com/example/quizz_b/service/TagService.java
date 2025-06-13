@@ -1,11 +1,10 @@
 package com.example.quizz_b.service;
 
-import com.example.quizz_b.model.dto.TagDto;
+import com.example.quizz_b.model.dto.TagDetailDto;
 import com.example.quizz_b.model.entity.Tag;
 import com.example.quizz_b.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,7 @@ public class TagService {
     @Autowired
     private TagRepository tagRepository;
 
-    public List<TagDto> getAllTags(){
+    public List<TagDetailDto> getAllTags(){
         List<Tag> tags = tagRepository.findAll();
         return tags.stream().map(this::convertToDTO).toList();
     }
@@ -49,8 +48,8 @@ public class TagService {
         return saved;
     }
 
-    private TagDto convertToDTO(Tag tag){
-        TagDto tagDto = new TagDto();
+    private TagDetailDto convertToDTO(Tag tag){
+        TagDetailDto tagDto = new TagDetailDto();
         tagDto.setId(tag.getId());
         tagDto.setName(tag.getName());
         tagDto.setCountArticles(tag.getCountArticle());

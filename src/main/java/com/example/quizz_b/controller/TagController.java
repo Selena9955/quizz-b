@@ -1,6 +1,6 @@
 package com.example.quizz_b.controller;
 
-import com.example.quizz_b.model.dto.TagDto;
+import com.example.quizz_b.model.dto.TagDetailDto;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,9 @@ public class TagController {
     private TagService tagService;
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<TagDto>>> getTags() {
+    public ResponseEntity<ApiResponse<List<TagDetailDto>>> getTags() {
             try{
-                List<TagDto> result= tagService.getAllTags();
+                List<TagDetailDto> result= tagService.getAllTags();
                 return ResponseEntity.ok(ApiResponse.success("取得成功", result));
             } catch (RuntimeException ex) {
                 return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
