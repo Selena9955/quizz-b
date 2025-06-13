@@ -1,5 +1,6 @@
 package com.example.quizz_b.controller;
 
+import com.example.quizz_b.model.dto.QuizDto;
 import com.example.quizz_b.model.dto.QuizListDto;
 import com.example.quizz_b.model.dto.QuizSubmitRequestDto;
 import com.example.quizz_b.model.entity.User;
@@ -44,6 +45,16 @@ public class QuizController {
         try{
             List<QuizListDto> listDtos =  quizService.getAllQuizzes();
             return ResponseEntity.ok(ApiResponse.success("取得成功", listDtos));
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<QuizDto>> getQuiz(@PathVariable Long id){
+        try{
+            QuizDto quizDto =  quizService.getQuizById(id);
+            return ResponseEntity.ok(ApiResponse.success("取得成功", quizDto));
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }

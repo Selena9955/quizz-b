@@ -1,10 +1,13 @@
 package com.example.quizz_b.service;
 
 import com.example.quizz_b.constant.enums.QuizType;
+import com.example.quizz_b.factory.quiz.QuizDtoFactory;
 import com.example.quizz_b.factory.quiz.QuizHandlerFactory;
+import com.example.quizz_b.model.dto.QuizDto;
 import com.example.quizz_b.model.dto.QuizListDto;
 import com.example.quizz_b.model.dto.QuizSubmitRequestDto;
 import com.example.quizz_b.model.entity.Quiz;
+import com.example.quizz_b.model.entity.QuizOption;
 import com.example.quizz_b.model.entity.Tag;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.repository.QuizRepository;
@@ -29,22 +32,26 @@ public class QuizService {
     @Transactional
     public void create(QuizSubmitRequestDto dto, User user) {
         QuizType type = QuizType.fromValue(dto.getQuizType());
-        System.out.println(dto.getTags());
-        Set<Tag> tags = tagService.getOrCreateTags(dto.getTags());
 
         // 驗證
         factory.getHandler(type).validate(dto);
 
+        Set<Tag> tags = tagService.getOrCreateTags(dto.getTags());
         Quiz quiz = new Quiz();
         quiz.setAuthor(user);
         quiz.setQuizType(type);
         quiz.setTitle(dto.getTitle());
         quiz.setTitleDetail(dto.getTitleDetail());
-        quiz.setOptions(dto.getOptions());
         quiz.setSingleAnswerId(dto.getSingleAnswerId());
         quiz.setMultipleAnswerId(dto.getMultipleAnswerId());
         quiz.setFlashAnswer(dto.getFlashAnswer());
         quiz.setTags(tags);
+
+        List<QuizOption> options = dto.getOptions();
+        for (QuizOption option : options) {
+            option.setQuiz(quiz); // 設定每個選項的 quiz 外鍵
+        }
+        quiz.setOptions(options);
 
         quizRepository.save(quiz);
     }
@@ -53,6 +60,14 @@ public class QuizService {
     public List<QuizListDto> getAllQuizzes() {
         List<Quiz> quizzes = quizRepository.findAllByOrderByCreateTimeDesc();
         return quizzes.stream().map(this::convertToListDTO).toList();
+    }
+
+    @Transactional
+    public QuizDto getQuizById(Long id) {
+        Quiz quiz = quizRepository.findWithDetailsById(id)
+                .orElseThrow(() -> new RuntimeException("查無此題"));
+
+        return QuizDtoFactory.fromEntity(quiz);
     }
 
     public QuizListDto convertToListDTO(Quiz quiz) {
