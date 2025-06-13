@@ -73,8 +73,9 @@ public class Quiz {
     private Set<String> multipleAnswerId;
 
     // 解答-記憶題
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String flashAnswer;
 
     private String answerDetail;
-
 }
