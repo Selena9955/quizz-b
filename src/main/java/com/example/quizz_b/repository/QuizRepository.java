@@ -13,6 +13,6 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
     @EntityGraph(attributePaths = {"tags", "author", "options"})
     List<Quiz> findAllByOrderByCreateTimeDesc();
 
-    @EntityGraph(attributePaths = {"tags", "author", "options"})
+    @EntityGraph(attributePaths = {"tags", "author", "options", "multipleAnswerId"})
     Optional<Quiz> findWithDetailsById(Long id);
 }

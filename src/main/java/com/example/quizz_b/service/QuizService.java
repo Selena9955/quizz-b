@@ -11,10 +11,12 @@ import com.example.quizz_b.model.entity.QuizOption;
 import com.example.quizz_b.model.entity.Tag;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.repository.QuizRepository;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +38,8 @@ public class QuizService {
         // 驗證
         factory.getHandler(type).validate(dto);
 
+
+
         Set<Tag> tags = tagService.getOrCreateTags(dto.getTags());
         Quiz quiz = new Quiz();
         quiz.setAuthor(user);
@@ -43,9 +47,10 @@ public class QuizService {
         quiz.setTitle(dto.getTitle());
         quiz.setTitleDetail(dto.getTitleDetail());
         quiz.setSingleAnswerId(dto.getSingleAnswerId());
-        quiz.setMultipleAnswerId(dto.getMultipleAnswerId());
+        quiz.setMultipleAnswerId(new HashSet<>(dto.getMultipleAnswerId()));
         quiz.setFlashAnswer(dto.getFlashAnswer());
         quiz.setTags(tags);
+        quiz.setAnswerDetail(dto.getAnswerDetail());
 
         List<QuizOption> options = dto.getOptions();
         for (QuizOption option : options) {
@@ -64,8 +69,18 @@ public class QuizService {
 
     @Transactional
     public QuizDto getQuizById(Long id) {
-        Quiz quiz = quizRepository.findWithDetailsById(id)
+        Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("查無此題"));
+
+        // 延遲加載：等到真的需要才抓
+        if (quiz.getQuizType() == QuizType.MULTIPLE) {
+            quiz.getMultipleAnswerId().size();
+        }
+
+        // lazy 的其他欄位照需求決定要不要 init
+        Hibernate.initialize(quiz.getOptions());
+        Hibernate.initialize(quiz.getTags());
+        Hibernate.initialize(quiz.getAuthor());
 
         return QuizDtoFactory.fromEntity(quiz);
     }

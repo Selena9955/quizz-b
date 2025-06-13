@@ -70,7 +70,7 @@ public class Quiz {
     // 解答-多選題
     @ElementCollection
     @CollectionTable(name = "quiz_multiple_answer", joinColumns = @JoinColumn(name = "quiz_id"))
-    private List<String> multipleAnswerId;
+    private Set<String> multipleAnswerId;
 
     // 解答-記憶題
     private String flashAnswer;

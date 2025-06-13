@@ -4,6 +4,7 @@ import com.example.quizz_b.constant.enums.QuizType;
 import com.example.quizz_b.model.dto.*;
 import com.example.quizz_b.model.entity.Quiz;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QuizDtoFactory {
@@ -27,7 +28,7 @@ public class QuizDtoFactory {
             case MULTIPLE:
                 MultipleChoiceQuizDto multiDto = new MultipleChoiceQuizDto();
                 multiDto.setOptions(optionDtos);
-                multiDto.setMultipleAnswerId(quiz.getMultipleAnswerId());
+                multiDto.setMultipleAnswerId(new ArrayList<>(quiz.getMultipleAnswerId()));
                 baseDto = multiDto;
                 break;
             case FLASH:
@@ -40,11 +41,12 @@ public class QuizDtoFactory {
         }
 
         baseDto.setId(quiz.getId());
-        baseDto.setQuizType(quiz.getQuizType());
+        baseDto.setQuizType(quiz.getQuizType().getValue());
         baseDto.setTitle(quiz.getTitle());
         baseDto.setTitleDetail(quiz.getTitleDetail());
         baseDto.setAnswerDetail(quiz.getAnswerDetail());
         baseDto.setTags(quiz.getTags().stream() .map(tag -> new TagDto(tag.getId(), tag.getName())).toList());
+        baseDto.setAuthorId(quiz.getAuthor().getId());
         baseDto.setAuthorName(quiz.getAuthor().getUsername());
         baseDto.setCreateTime(quiz.getCreateTime());
         baseDto.setUpdateTime(quiz.getUpdateTime());
