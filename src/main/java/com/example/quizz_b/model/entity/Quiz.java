@@ -78,4 +78,7 @@ public class Quiz {
     private String flashAnswer;
 
     private String answerDetail;
+
+    @Column(name = "is_delete")
+    private boolean isDelete  = false;
 }

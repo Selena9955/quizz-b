@@ -15,4 +15,7 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
 
     @EntityGraph(attributePaths = {"tags", "author", "options", "multipleAnswerId"})
     Optional<Quiz> findWithDetailsById(Long id);
+
+    @EntityGraph(attributePaths = {"tags", "author"})
+    List<Quiz> findAllByIsDeleteFalseOrderByCreateTimeDesc();
 }

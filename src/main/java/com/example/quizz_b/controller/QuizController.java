@@ -59,4 +59,17 @@ public class QuizController {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteQuiz(@PathVariable Long id,HttpServletRequest request){
+        try{
+            String token = jwtUtil.extractTokenFromRequest(request);
+            Long userId = jwtUtil.extractUserId(token);
+
+            quizService.softDeleteQuizById(id, userId);
+            return ResponseEntity.ok(ApiResponse.success("刪除成功", null));
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
+        }
+    }
 }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,7 +64,7 @@ public class QuizService {
 
     @Transactional
     public List<QuizListDto> getAllQuizzes() {
-        List<Quiz> quizzes = quizRepository.findAllByOrderByCreateTimeDesc();
+        List<Quiz> quizzes = quizRepository.findAllByIsDeleteFalseOrderByCreateTimeDesc();
         return quizzes.stream().map(this::convertToListDTO).toList();
     }
 
@@ -99,5 +100,17 @@ public class QuizService {
         dto.setTags(tagNames);
 
         return dto;
+    }
+
+    public void softDeleteQuizById(Long quizId, Long userId) throws AccessDeniedException {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Quiz 不存在"));
+
+        // TODO: 支援管理員可跳過作者驗證邏輯，允許硬刪除
+        if (!quiz.getAuthor().getId().equals(userId)) {
+            throw new AccessDeniedException("無權限刪除該資料");
+        }
+        quiz.setDelete(true);
+        quizRepository.save(quiz);
     }
 }
