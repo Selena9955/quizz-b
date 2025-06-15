@@ -3,13 +3,16 @@ package com.example.quizz_b.service;
 import com.example.quizz_b.constant.enums.UserRole;
 import com.example.quizz_b.constant.enums.UserStatus;
 import com.example.quizz_b.model.dto.ProfileDto;
+import com.example.quizz_b.model.dto.ProfileRequestDto;
 import com.example.quizz_b.model.dto.UserDto;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.repository.UserRepository;
 import com.example.quizz_b.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -151,23 +154,55 @@ public class UserService {
         return user;
     }
 
-    public ProfileDto getUserProfileById(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("使用者不存在"));
-
+    private ProfileDto convertToProfileDto(User user) {
         ProfileDto dto = new ProfileDto();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setBio(user.getBio());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setProfileBgUrl(user.getProfileBgUrl());
-        dto.setFollowers(0);
-        dto.setArticleCount(1905);
-        dto.setQuizCount(0);
+        dto.setFollowers(0);       // TODO: 實作 followers 數量邏輯
+        dto.setArticleCount(1905); // TODO: 實作實際文章數查詢
+        dto.setQuizCount(0);       // TODO: 實作 quiz 數查詢
 
         return dto;
     }
 
-    public void updateUserProfile(User user) {
-        System.out.println(user);
+    public ProfileDto getUserProfileById(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("使用者不存在"));
+        return convertToProfileDto(user);
+    }
+
+    public ProfileDto updateUserProfile(ProfileRequestDto formData, User user) {
+        //用戶名有更改
+        if (!formData.getUsername().equals(user.getUsername())) {
+            String newUsername = formData.getUsername();
+
+            // 長度限制
+            if (newUsername.length() < 2 || newUsername.length() > 50) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "用戶名長度需為 2～50 字之間");
+            }
+
+            // 重複性檢查
+            if (isUsernameTaken(newUsername)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "用戶名已被使用");
+            }
+
+            user.setUsername(newUsername);
+        }
+
+        String base64Avatar = formData.getAvatarUrl();
+        String base64ProfileBg = formData.getProfileBgUrl();
+
+        if(base64Avatar.startsWith("data:image/")){
+            user.setAvatarUrl(base64Avatar);
+        }
+        if(base64ProfileBg.startsWith("data:image/")){
+            user.setProfileBgUrl(base64ProfileBg);
+        }
+
+        user.setBio(formData.getBio());
+        userRepository.save(user);
+        return convertToProfileDto(user);
     }
 }
