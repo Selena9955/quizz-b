@@ -9,6 +9,7 @@ import com.example.quizz_b.model.entity.Tag;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.repository.ArticleRepository;
 import com.example.quizz_b.repository.TagRepository;
+import com.example.quizz_b.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class ArticleService {
 
     @Autowired
     private TagRepository tagRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional
     public void create(ArticleCreateRequestDto request, User user) {
@@ -140,6 +144,13 @@ public class ArticleService {
         return dto;
     }
 
+    @Transactional
+    public List<ArticleListDto> getArticlesByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("使用者不存在"));
 
+        List<Article> articles = articleRepository.findByAuthorId(user.getId());
+        return articles.stream().map(this::convertToListDTO).toList();
+    }
 }
 

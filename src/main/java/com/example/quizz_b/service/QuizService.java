@@ -6,11 +6,9 @@ import com.example.quizz_b.factory.quiz.QuizHandlerFactory;
 import com.example.quizz_b.model.dto.QuizDto;
 import com.example.quizz_b.model.dto.QuizListDto;
 import com.example.quizz_b.model.dto.QuizSubmitRequestDto;
-import com.example.quizz_b.model.entity.Quiz;
-import com.example.quizz_b.model.entity.QuizOption;
-import com.example.quizz_b.model.entity.Tag;
-import com.example.quizz_b.model.entity.User;
+import com.example.quizz_b.model.entity.*;
 import com.example.quizz_b.repository.QuizRepository;
+import com.example.quizz_b.repository.UserRepository;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +23,9 @@ import java.util.Set;
 public class QuizService {
     @Autowired
     private QuizRepository quizRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private TagService tagService;
@@ -112,5 +113,14 @@ public class QuizService {
         }
         quiz.setDelete(true);
         quizRepository.save(quiz);
+    }
+
+    @Transactional
+    public List<QuizListDto> getQuizzesByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("使用者不存在"));
+
+        List<Quiz> quizzes = quizRepository.findByAuthorId(user.getId());
+        return quizzes.stream().map(this::convertToListDTO).toList();
     }
 }
