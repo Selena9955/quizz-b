@@ -2,6 +2,7 @@ package com.example.quizz_b.service;
 
 import com.example.quizz_b.constant.enums.UserRole;
 import com.example.quizz_b.constant.enums.UserStatus;
+import com.example.quizz_b.model.dto.ProfileDto;
 import com.example.quizz_b.model.dto.UserDto;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.repository.UserRepository;
@@ -150,5 +151,23 @@ public class UserService {
         return user;
     }
 
+    public ProfileDto getUserProfileById(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("使用者不存在"));
 
+        ProfileDto dto = new ProfileDto();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setBio(user.getBio());
+        dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setProfileBgUrl(user.getProfileBgUrl());
+        dto.setFollowers(0);
+        dto.setArticleCount(1905);
+        dto.setQuizCount(0);
+
+        return dto;
+    }
+
+    public void updateUserProfile(User user) {
+        System.out.println(user);
+    }
 }

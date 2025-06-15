@@ -65,4 +65,15 @@ public class User {
     @ToString.Exclude
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Quiz> quizzes = new ArrayList<>();
+
+    @Lob
+    @Column(name = "avatar_url", columnDefinition = "LONGTEXT")
+    private String avatarUrl;
+
+    @Lob
+    @Column(name = "profile_bg_url", columnDefinition = "LONGTEXT")
+    private String profileBgUrl;
+
+    @Size(max = 200)
+    private String bio;
 }
