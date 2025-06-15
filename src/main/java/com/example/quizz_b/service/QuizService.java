@@ -123,4 +123,9 @@ public class QuizService {
         List<Quiz> quizzes = quizRepository.findByAuthorId(user.getId());
         return quizzes.stream().map(this::convertToListDTO).toList();
     }
+
+    @Transactional(readOnly = true)
+    public int getQuizCountByUserId(Long id) {
+        return quizRepository.countByAuthorId(id);
+    }
 }

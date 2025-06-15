@@ -152,5 +152,10 @@ public class ArticleService {
         List<Article> articles = articleRepository.findByAuthorId(user.getId());
         return articles.stream().map(this::convertToListDTO).toList();
     }
+
+    @Transactional(readOnly = true)
+    public int getArticleCountByUserId(Long id) {
+        return articleRepository.countByAuthorId(id);
+    }
 }
 

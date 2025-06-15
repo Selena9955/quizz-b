@@ -20,4 +20,6 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
     List<Quiz> findAllByIsDeleteFalseOrderByCreateTimeDesc();
 
     List<Quiz> findByAuthorId(Long userId);
+
+    int countByAuthorId(Long userId);
 }

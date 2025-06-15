@@ -24,8 +24,15 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private QuizService quizService;
+
+    @Autowired
+    private ArticleService articleService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -162,8 +169,8 @@ public class UserService {
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setProfileBgUrl(user.getProfileBgUrl());
         dto.setFollowers(0);       // TODO: 實作 followers 數量邏輯
-        dto.setArticleCount(1905); // TODO: 實作實際文章數查詢
-        dto.setQuizCount(0);       // TODO: 實作 quiz 數查詢
+        dto.setArticleCount(articleService.getArticleCountByUserId(user.getId()));
+        dto.setQuizCount(quizService.getQuizCountByUserId(user.getId()));
 
         return dto;
     }
