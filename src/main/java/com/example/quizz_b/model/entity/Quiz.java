@@ -42,7 +42,7 @@ public class Quiz {
     private String title;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String titleDetail;
 
     @ToString.Exclude
@@ -74,7 +74,7 @@ public class Quiz {
 
     // 解答-記憶題
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String flashAnswer;
 
     private String answerDetail;

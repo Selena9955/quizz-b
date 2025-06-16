@@ -201,10 +201,10 @@ public class UserService {
         String base64Avatar = formData.getAvatarUrl();
         String base64ProfileBg = formData.getProfileBgUrl();
 
-        if(base64Avatar.startsWith("data:image/")){
+        if(base64Avatar!= null && base64Avatar.startsWith("data:image/")){
             user.setAvatarUrl(base64Avatar);
         }
-        if(base64ProfileBg.startsWith("data:image/")){
+        if(base64ProfileBg!=null && base64ProfileBg.startsWith("data:image/")){
             user.setProfileBgUrl(base64ProfileBg);
         }
 
