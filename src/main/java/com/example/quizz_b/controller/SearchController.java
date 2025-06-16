@@ -1,9 +1,10 @@
 package com.example.quizz_b.controller;
 
-import com.example.quizz_b.model.dto.ProfileDto;
 import com.example.quizz_b.model.dto.SearchResultDto;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.SearchService;
+import com.example.quizz_b.utils.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,12 +20,31 @@ public class SearchController {
     @Autowired
     private SearchService searchService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @GetMapping
-    public ResponseEntity<ApiResponse<SearchResultDto>> search(@RequestParam("q") String keyword) {
+    public ResponseEntity<ApiResponse<SearchResultDto>> search(@RequestParam("q") String keyword, HttpServletRequest request) {
+        String token = jwtUtil.extractTokenFromRequest(request);
+        Long userId = jwtUtil.extractUserId(token);
+
         // 這裡的 keyword 是已解碼的，例如 "java+ 測試"
-        SearchResultDto dto = searchService.search(keyword);
+        SearchResultDto dto = searchService.search(keyword,userId);
         System.out.println(dto);
         return ResponseEntity.ok(ApiResponse.success("搜尋成功", dto));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<ApiResponse<List<String>>> getSearchHistory(HttpServletRequest request) {
+        String token = jwtUtil.extractTokenFromRequest(request);
+        Long userId = jwtUtil.extractUserId(token);
+
+        if (userId == null) {
+            return ResponseEntity.ok(ApiResponse.success("未登入使用者，無搜尋紀錄", List.of()));
+        }
+
+        List<String> history = searchService.getRecentKeywords(userId);
+        return ResponseEntity.ok(ApiResponse.success("取得成功", history));
     }
 
 }
