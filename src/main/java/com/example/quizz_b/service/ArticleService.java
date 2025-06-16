@@ -157,5 +157,13 @@ public class ArticleService {
     public int getArticleCountByUserId(Long id) {
         return articleRepository.countByAuthorId(id);
     }
+
+    @Transactional
+    public List<ArticleListDto> searchByTitle(String keyword) {
+        return articleRepository.findByTitleContainingIgnoreCase(keyword)
+                .stream()
+                .map(this::convertToListDTO)
+                .toList();
+    }
 }
 

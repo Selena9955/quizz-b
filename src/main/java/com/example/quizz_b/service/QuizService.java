@@ -128,4 +128,12 @@ public class QuizService {
     public int getQuizCountByUserId(Long id) {
         return quizRepository.countByAuthorId(id);
     }
+
+    @Transactional
+    public List<QuizListDto> searchByTitle(String keyword) {
+        return quizRepository.findByTitleContainingIgnoreCaseAndIsDeleteFalse(keyword)
+                .stream()
+                .map(this::convertToListDTO)
+                .toList();
+    }
 }

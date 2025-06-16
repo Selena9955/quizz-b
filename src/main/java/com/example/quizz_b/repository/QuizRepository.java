@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,4 +23,6 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
     List<Quiz> findByAuthorId(Long userId);
 
     int countByAuthorId(Long userId);
+
+    List<Quiz> findByTitleContainingIgnoreCaseAndIsDeleteFalse(String keyword);
 }
