@@ -36,7 +36,7 @@ public class Article {
     private String title;
 
     @Lob
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
     @Lob
