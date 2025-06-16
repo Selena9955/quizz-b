@@ -72,4 +72,21 @@ public class QuizController {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> update(
+            @PathVariable Long id,
+            @RequestBody QuizSubmitRequestDto dto,
+            HttpServletRequest request) {
+        try {
+            String token = jwtUtil.extractTokenFromRequest(request);
+            Long userId = jwtUtil.extractUserId(token);
+            User user = userService.getById(userId);
+
+            quizService.update(id, dto, user);
+            return ResponseEntity.ok(ApiResponse.success("更新成功", null));
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, ex.getMessage()));
+        }
+    }
 }

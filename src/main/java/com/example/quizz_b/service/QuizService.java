@@ -116,6 +116,46 @@ public class QuizService {
     }
 
     @Transactional
+    public void update(Long id, QuizSubmitRequestDto dto, User user) {
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("找不到指定的題目"));
+
+        // 權限驗證：只能本人修改
+        if (!quiz.getAuthor().getId().equals(user.getId())) {
+            throw new RuntimeException("無權限修改他人題目");
+        }
+
+        QuizType type = QuizType.fromValue(dto.getQuizType());
+
+        // 題型驗證（工廠處理）
+        factory.getHandler(type).validate(dto);
+
+        // 更新欄位
+        Set<Tag> tags = tagService.getOrCreateTags(dto.getTags());
+        quiz.setQuizType(type);
+        quiz.setTitle(dto.getTitle());
+        quiz.setTitleDetail(dto.getTitleDetail());
+        quiz.setSingleAnswerId(dto.getSingleAnswerId());
+        quiz.setMultipleAnswerId(new HashSet<>(dto.getMultipleAnswerId()));
+        quiz.setFlashAnswer(dto.getFlashAnswer());
+        quiz.setAnswerDetail(dto.getAnswerDetail());
+        quiz.setTags(tags);
+
+        // 清空原選項 → 設定新選項
+        quiz.getOptions().clear(); // 這會移除原 list 中所有選項 → orphanRemoval 生效
+
+        List<QuizOption> newOptions = dto.getOptions();
+        for (QuizOption option : newOptions) {
+            option.setQuiz(quiz); // 綁定關聯
+        }
+
+        quiz.getOptions().addAll(newOptions); // 加入新的選項到同一個 List 實例
+
+        // 最後 save（或自動 flush）
+        quizRepository.save(quiz);
+    }
+
+    @Transactional
     public List<QuizListDto> getQuizzesByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("使用者不存在"));
@@ -136,4 +176,5 @@ public class QuizService {
                 .map(this::convertToListDTO)
                 .toList();
     }
+
 }
