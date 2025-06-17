@@ -11,13 +11,14 @@ import com.example.quizz_b.repository.QuizRepository;
 import com.example.quizz_b.repository.UserRepository;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class QuizService {
@@ -64,9 +65,28 @@ public class QuizService {
     }
 
     @Transactional
-    public List<QuizListDto> getAllQuizzes() {
-        List<Quiz> quizzes = quizRepository.findAllByIsDeleteFalseOrderByCreateTimeDesc();
-        return quizzes.stream().map(this::convertToListDTO).toList();
+    public Map<String, Object> getAllQuizzes(String type, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Quiz> quizPage;
+        if ("ALL".equalsIgnoreCase(type)) {
+            quizPage = quizRepository.findAllVisible(pageable);
+        } else {
+            QuizType quizType = QuizType.valueOf(type);
+            quizPage = quizRepository.findAllVisibleByType(quizType, pageable);
+        }
+        List<QuizListDto> items = quizPage.getContent().stream()
+                .map(this::convertToListDTO)
+                .toList();
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("items", items);
+        result.put("totalPages", quizPage.getTotalPages());
+        result.put("totalItems", quizPage.getTotalElements());
+        result.put("currentPage", page);
+        result.put("pageSize", size);
+
+        return result;
     }
 
     @Transactional

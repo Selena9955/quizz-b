@@ -1,8 +1,13 @@
 package com.example.quizz_b.repository;
 
+import com.example.quizz_b.constant.enums.QuizType;
 import com.example.quizz_b.model.entity.Quiz;
+import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
@@ -25,4 +30,11 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
     int countByAuthorId(Long userId);
 
     List<Quiz> findByTitleContainingIgnoreCaseAndIsDeleteFalse(String keyword);
+
+    @Query("SELECT q FROM Quiz q WHERE q.isDelete = false ORDER BY q.createTime DESC")
+    Page<Quiz> findAllVisible(Pageable pageable);
+
+    @Query("SELECT q FROM Quiz q WHERE q.isDelete = false AND q.quizType = :quizType ORDER BY q.createTime DESC")
+    Page<Quiz> findAllVisibleByType(@Param("quizType") QuizType quizType, Pageable pageable);
+
 }

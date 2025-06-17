@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/quizzes")
@@ -41,9 +41,11 @@ public class QuizController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<QuizListDto>>> getAllQuizzes(){
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAllQuizzes( @RequestParam(defaultValue = "ALL") String type,
+                                                                         @RequestParam(defaultValue = "1") int page,
+                                                                         @RequestParam(defaultValue = "10") int size){
         try{
-            List<QuizListDto> listDtos =  quizService.getAllQuizzes();
+            Map<String, Object> listDtos =  quizService.getAllQuizzes(type, page, size);
             return ResponseEntity.ok(ApiResponse.success("取得成功", listDtos));
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
