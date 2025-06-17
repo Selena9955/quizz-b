@@ -16,6 +16,7 @@ public abstract class QuizDto {
     private List<TagDto> tags;
     private Long authorId;
     private String authorName;
+    private String authorAvatarUrl;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

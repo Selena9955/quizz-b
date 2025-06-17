@@ -48,6 +48,7 @@ public class QuizDtoFactory {
         baseDto.setTags(quiz.getTags().stream() .map(tag -> new TagDto(tag.getId(), tag.getName())).toList());
         baseDto.setAuthorId(quiz.getAuthor().getId());
         baseDto.setAuthorName(quiz.getAuthor().getUsername());
+        baseDto.setAuthorAvatarUrl(quiz.getAuthor().getAvatarUrl());
         baseDto.setCreateTime(quiz.getCreateTime());
         baseDto.setUpdateTime(quiz.getUpdateTime());
 
