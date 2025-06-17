@@ -148,18 +148,12 @@ public class UserService {
         dto.setEmail(user.getEmail());
         dto.setStatus(user.getStatus());
         dto.setRole(user.getRole());
+        dto.setAvatarUrl(user.getAvatarUrl());
+        dto.setProfileBgUrl(user.getProfileBgUrl());
+
         return dto;
     }
 
-    private User convertToEntity(UserDto dto) {
-        User user = new User();
-        user.setId(dto.getId());
-        user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
-        user.setStatus(dto.getStatus());
-        user.setRole(dto.getRole());
-        return user;
-    }
 
     private ProfileDto convertToProfileDto(User user) {
         ProfileDto dto = new ProfileDto();

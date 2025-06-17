@@ -15,5 +15,6 @@ public class UserDto {
     private String email;
     private UserStatus status;
     private UserRole role;
-
+    private String avatarUrl;
+    private String profileBgUrl;
 }

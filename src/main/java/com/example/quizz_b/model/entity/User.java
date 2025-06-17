@@ -76,4 +76,10 @@ public class User {
 
     @Size(max = 200)
     private String bio;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserFollow> following;
+
+    @OneToMany(mappedBy = "following")
+    private List<UserFollow> followers;
 }
