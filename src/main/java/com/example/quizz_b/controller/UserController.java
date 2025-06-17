@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -69,4 +71,22 @@ public class UserController {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
     }
+
+    @PostMapping("/follow/{targetUserId}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> toggleFollow(@PathVariable Long targetUserId, HttpServletRequest request) {
+        String token = jwtUtil.extractTokenFromRequest(request);
+        Long userId = jwtUtil.extractUserId(token);
+        System.out.println(userId+" "+targetUserId);
+
+        Boolean isFollowing = userService.toggleFollow(userId, targetUserId);
+        int followerCount = userService.getFollowerCountById(targetUserId);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("isFollowing", isFollowing);
+        result.put("followerCount", followerCount);
+
+        return ResponseEntity.ok(ApiResponse.success("切換成功", result ));
+    }
+
+
 }

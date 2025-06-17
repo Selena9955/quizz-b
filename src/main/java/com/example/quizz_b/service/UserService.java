@@ -6,6 +6,8 @@ import com.example.quizz_b.model.dto.ProfileDto;
 import com.example.quizz_b.model.dto.ProfileRequestDto;
 import com.example.quizz_b.model.dto.UserDto;
 import com.example.quizz_b.model.entity.User;
+import com.example.quizz_b.model.entity.UserFollow;
+import com.example.quizz_b.repository.UserFollowRepository;
 import com.example.quizz_b.repository.UserRepository;
 import com.example.quizz_b.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserFollowRepository userFollowRepository;
 
     @Autowired
     private EmailService emailService;
@@ -162,7 +167,7 @@ public class UserService {
         dto.setBio(user.getBio());
         dto.setAvatarUrl(user.getAvatarUrl());
         dto.setProfileBgUrl(user.getProfileBgUrl());
-        dto.setFollowers(0);       // TODO: 實作 followers 數量邏輯
+        dto.setFollowers(getFollowerCountById(user.getId()));
         dto.setArticleCount(articleService.getArticleCountByUserId(user.getId()));
         dto.setQuizCount(quizService.getQuizCountByUserId(user.getId()));
 
@@ -205,5 +210,24 @@ public class UserService {
         user.setBio(formData.getBio());
         userRepository.save(user);
         return convertToProfileDto(user);
+    }
+
+    public Boolean toggleFollow(Long userId, Long targetUserId) {
+        Optional<UserFollow> existing = userFollowRepository.findByUserIdAndFollowingId(userId, targetUserId);
+
+        if (existing.isPresent()) {
+            userFollowRepository.delete(existing.get());
+            return false; // 已取消追蹤
+        } else {
+            UserFollow follow = new UserFollow();
+            follow.setUser(userRepository.getReferenceById(userId));
+            follow.setFollowing(userRepository.getReferenceById(targetUserId));
+            userFollowRepository.save(follow);
+            return true; // 成功追蹤
+        }
+    }
+
+    public int getFollowerCountById(Long userId){
+        return userFollowRepository.countByFollowingId(userId);
     }
 }
