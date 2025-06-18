@@ -96,8 +96,7 @@ public class JwtUtil {
     // 簡化方法：只驗證簽章合法性
     public boolean validateToken(String token) {
         try {
-            isTokenExpired(token);
-            return true;
+            return !isTokenExpired(token);
         } catch (Exception e) {
             return false;
         }

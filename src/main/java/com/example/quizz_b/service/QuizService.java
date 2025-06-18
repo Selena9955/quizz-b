@@ -48,8 +48,6 @@ public class QuizService {
         // 驗證
         factory.getHandler(type).validate(dto);
 
-
-
         Set<Tag> tags = tagService.getOrCreateTags(dto.getTags());
         Quiz quiz = new Quiz();
         quiz.setAuthor(user);
