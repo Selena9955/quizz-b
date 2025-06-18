@@ -5,8 +5,10 @@ import com.example.quizz_b.factory.quiz.QuizDtoFactory;
 import com.example.quizz_b.factory.quiz.QuizHandlerFactory;
 import com.example.quizz_b.model.dto.QuizDto;
 import com.example.quizz_b.model.dto.QuizListDto;
+import com.example.quizz_b.model.dto.QuizRecordRequestDto;
 import com.example.quizz_b.model.dto.QuizSubmitRequestDto;
 import com.example.quizz_b.model.entity.*;
+import com.example.quizz_b.repository.QuizRecordRepository;
 import com.example.quizz_b.repository.QuizRepository;
 import com.example.quizz_b.repository.UserRepository;
 import org.hibernate.Hibernate;
@@ -14,8 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.AccessDeniedException;
 import java.util.*;
@@ -24,6 +28,9 @@ import java.util.*;
 public class QuizService {
     @Autowired
     private QuizRepository quizRepository;
+
+    @Autowired
+    private QuizRecordRepository quizRecordRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -92,7 +99,7 @@ public class QuizService {
     @Transactional
     public QuizDto getQuizById(Long id) {
         Quiz quiz = quizRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("查無此題"));
+                .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "查無此題"));
 
         // 延遲加載：等到真的需要才抓
         if (quiz.getQuizType() == QuizType.MULTIPLE) {
@@ -197,4 +204,31 @@ public class QuizService {
                 .toList();
     }
 
+    public Map<String, Object> recordAnswer(QuizRecordRequestDto request, Long userId) {
+        Quiz quiz = quizRepository.findById(request.getQuizId())
+                .orElseThrow(() -> new RuntimeException("找不到該題目"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("找不到使用者"));
+
+        // 建立紀錄物件
+        QuizRecord record = new QuizRecord();
+        record.setQuiz(quiz);
+        record.setUser(user);
+        record.setIsCorrect(request.getIsCorrect());
+
+        quizRecordRepository.save(record);
+
+        Long total = quizRecordRepository.countByQuizId(quiz.getId());
+        Long correct = quizRecordRepository.countByQuizIdAndIsCorrectTrue(quiz.getId());
+
+        double rate = (total == 0) ? 0.0 : (double) correct / total;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalCount", total);
+        result.put("correctCount", correct);
+        result.put("correctRate", rate);
+
+        return result;
+    }
 }

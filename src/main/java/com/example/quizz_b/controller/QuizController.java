@@ -2,6 +2,7 @@ package com.example.quizz_b.controller;
 
 import com.example.quizz_b.model.dto.QuizDto;
 import com.example.quizz_b.model.dto.QuizListDto;
+import com.example.quizz_b.model.dto.QuizRecordRequestDto;
 import com.example.quizz_b.model.dto.QuizSubmitRequestDto;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.response.ApiResponse;
@@ -54,12 +55,8 @@ public class QuizController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<QuizDto>> getQuiz(@PathVariable Long id){
-        try{
-            QuizDto quizDto =  quizService.getQuizById(id);
-            return ResponseEntity.ok(ApiResponse.success("取得成功", quizDto));
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
-        }
+        QuizDto quizDto = quizService.getQuizById(id);
+        return ResponseEntity.ok(ApiResponse.success("取得成功", quizDto));
     }
 
     @DeleteMapping("/{id}")
@@ -76,10 +73,9 @@ public class QuizController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> update(
-            @PathVariable Long id,
-            @RequestBody QuizSubmitRequestDto dto,
-            HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Void>> update(@PathVariable Long id,
+                                                    @RequestBody QuizSubmitRequestDto dto,
+                                                    HttpServletRequest request) {
         try {
             String token = jwtUtil.extractTokenFromRequest(request);
             Long userId = jwtUtil.extractUserId(token);
@@ -90,5 +86,15 @@ public class QuizController {
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400, ex.getMessage()));
         }
+    }
+
+    @PostMapping("/records")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> recordAnswer(@RequestBody QuizRecordRequestDto request,
+                                                          HttpServletRequest httpRequest) {
+        String token = jwtUtil.extractTokenFromRequest(httpRequest);
+        Long userId = jwtUtil.extractUserId(token);
+
+        Map<String, Object> data = quizService.recordAnswer(request,userId);
+        return ResponseEntity.ok(ApiResponse.success("答題記錄完成", data));
     }
 }

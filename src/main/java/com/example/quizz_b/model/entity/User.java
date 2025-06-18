@@ -82,4 +82,8 @@ public class User {
 
     @OneToMany(mappedBy = "following")
     private List<UserFollow> followers;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<QuizRecord> quizRecords = new ArrayList<>();
 }

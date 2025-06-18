@@ -81,4 +81,9 @@ public class Quiz {
 
     @Column(name = "is_delete")
     private boolean isDelete  = false;
+
+    // 所有答題記錄
+    @ToString.Exclude
+    @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY)
+    private List<QuizRecord> records = new ArrayList<>();
 }
