@@ -28,7 +28,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 重點！！
                 )
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/db/**").hasRole("ADMIN") // 這會變成：只允許 ROLE_ADMIN
+                        .requestMatchers("/db/**").hasAnyRole("ADMIN","ROOT") // 這會變成：允許 ROLE_ADMIN 和 ROLE_ROOT
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
