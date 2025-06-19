@@ -37,4 +37,6 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
     @Query("SELECT q FROM Quiz q WHERE q.isDelete = false AND q.quizType = :quizType ORDER BY q.createTime DESC")
     Page<Quiz> findAllVisibleByType(@Param("quizType") QuizType quizType, Pageable pageable);
 
+    @Query(value = "SELECT * FROM quiz ORDER BY create_time DESC LIMIT :limit", nativeQuery = true)
+    List<Quiz> findLatest(@Param("limit") int limit);
 }

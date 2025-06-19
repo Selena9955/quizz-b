@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -59,6 +60,13 @@ public class QuizController {
         return ResponseEntity.ok(ApiResponse.success("取得成功", quizDto));
     }
 
+    // 首頁用
+    @GetMapping("/latest")
+    public ResponseEntity<ApiResponse<List<QuizListDto>>> getLatestQuizzes(){
+        List<QuizListDto> dtos = quizService.findLatest(3);
+        return ResponseEntity.ok(ApiResponse.success("取得成功", dtos));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteQuiz(@PathVariable Long id,HttpServletRequest request){
         try{
@@ -97,4 +105,6 @@ public class QuizController {
         Map<String, Object> data = quizService.recordAnswer(request,userId);
         return ResponseEntity.ok(ApiResponse.success("答題記錄完成", data));
     }
+
+
 }

@@ -229,4 +229,12 @@ public class QuizService {
 
         return result;
     }
+
+    @Transactional
+    public List<QuizListDto> findLatest(int limit) {
+        List<Quiz> quizzes = quizRepository.findLatest(limit);
+        return quizzes.stream()
+                .map(this::convertToListDTO)
+                .toList();
+    }
 }
