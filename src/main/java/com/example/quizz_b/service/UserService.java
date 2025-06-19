@@ -4,6 +4,7 @@ import com.example.quizz_b.constant.enums.UserRole;
 import com.example.quizz_b.constant.enums.UserStatus;
 import com.example.quizz_b.model.dto.ProfileDto;
 import com.example.quizz_b.model.dto.ProfileRequestDto;
+import com.example.quizz_b.model.dto.UserCardDto;
 import com.example.quizz_b.model.dto.UserDto;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.model.entity.UserFollow;
@@ -19,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -229,5 +231,12 @@ public class UserService {
 
     public int getFollowerCountById(Long userId){
         return userFollowRepository.countByFollowingId(userId);
+    }
+
+    public List<UserCardDto> searchByUsername(String keyword) {
+        List<User> users = userRepository.searchByUsername(keyword);
+        return users.stream()
+                .map(u -> new UserCardDto(u.getId(), u.getUsername(), u.getAvatarUrl(),u.getBio()))
+                .toList();
     }
 }

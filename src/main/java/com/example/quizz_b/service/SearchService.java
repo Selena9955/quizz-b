@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -16,7 +17,7 @@ public class SearchService {
     private QuizService quizService;
 
     @Autowired
-    private TagService tagService;
+    private UserService userService;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -34,15 +35,35 @@ public class SearchService {
         return redisTemplate.opsForList().range(key, 0, 19);
     }
 
-    public SearchResultDto search(String keyword , Long userId) {
-        if (userId != null) {
+    public SearchResultDto search(SearchQueryDto query) {
+        String keyword = query.getQ();
+        Integer type = query.getType() ;
+        Long userId = query.getUserId();
+
+        if (type == null) {
+            type = 0; // 預設為查 quiz
+        }
+
+        if (userId != null && keyword != null && !keyword.isBlank()) {
             saveSearchKeyword(userId, keyword);
         }
 
-        List<QuizListDto> quizMatches = quizService.searchByTitle(keyword);
-        List<ArticleListDto> articleMatches = articleService.searchByTitle(keyword);
-        List<TagDetailDto> tagMatches = tagService.searchByName(keyword);
+        // 先預設成空陣列
+        List<QuizListDto> quizMatches = Collections.emptyList();
+        List<ArticleListDto> articleMatches = Collections.emptyList();
+        List<UserCardDto> userMatches = Collections.emptyList();
 
-        return new SearchResultDto(articleMatches, quizMatches, tagMatches);
+
+        if (type == 0) {
+            quizMatches = quizService.searchByTitle(keyword);
+        }
+        if (type == 1) {
+            articleMatches = articleService.searchByTitle(keyword);
+        }
+        if (type == 2) {
+            userMatches = userService.searchByUsername(keyword);
+        }
+
+        return new SearchResultDto(articleMatches, quizMatches, userMatches);
     }
 }
