@@ -1,9 +1,6 @@
 package com.example.quizz_b.controller;
 
-import com.example.quizz_b.model.dto.QuizDto;
-import com.example.quizz_b.model.dto.QuizListDto;
-import com.example.quizz_b.model.dto.QuizRecordRequestDto;
-import com.example.quizz_b.model.dto.QuizSubmitRequestDto;
+import com.example.quizz_b.model.dto.*;
 import com.example.quizz_b.model.entity.User;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.QuizService;
@@ -47,8 +44,8 @@ public class QuizController {
                                                                          @RequestParam(defaultValue = "1") int page,
                                                                          @RequestParam(defaultValue = "10") int size){
         try{
-            Map<String, Object> listDtos =  quizService.getAllQuizzes(type, page, size);
-            return ResponseEntity.ok(ApiResponse.success("取得成功", listDtos));
+            Map<String, Object> data =  quizService.getAllQuizzes(type, page, size);
+            return ResponseEntity.ok(ApiResponse.success("取得成功", data));
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
         }
@@ -97,12 +94,12 @@ public class QuizController {
     }
 
     @PostMapping("/records")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> recordAnswer(@RequestBody QuizRecordRequestDto request,
+    public ResponseEntity<ApiResponse<QuizStatsDto>> recordAnswer(@RequestBody QuizRecordRequestDto request,
                                                           HttpServletRequest httpRequest) {
         String token = jwtUtil.extractTokenFromRequest(httpRequest);
         Long userId = jwtUtil.extractUserId(token);
 
-        Map<String, Object> data = quizService.recordAnswer(request,userId);
+        QuizStatsDto data = quizService.recordAnswer(request, userId);
         return ResponseEntity.ok(ApiResponse.success("答題記錄完成", data));
     }
 

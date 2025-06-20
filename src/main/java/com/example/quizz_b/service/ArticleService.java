@@ -1,5 +1,6 @@
 package com.example.quizz_b.service;
 
+import com.example.quizz_b.constant.enums.TagUsageType;
 import com.example.quizz_b.model.dto.ArticleCreateRequestDto;
 import com.example.quizz_b.model.dto.ArticleDetailDto;
 import com.example.quizz_b.model.dto.ArticleListDto;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class ArticleService {
+    @Autowired
+    private TagService tagService;
+
     @Autowired
     private ArticleRepository articleRepository;
 
@@ -48,6 +52,7 @@ public class ArticleService {
                     return tag;
                 }
         ).collect(Collectors.toSet());
+        tags.forEach(tag -> tagService.recordTagUsage(tag.getName(), TagUsageType.QUIZ));
 
         Article article = new Article();
         article.setTitle(request.getTitle());
@@ -59,6 +64,7 @@ public class ArticleService {
         articleRepository.save(article);
     }
 
+    @Transactional
     public List<ArticleListDto> getAllArticles() {
         List<Article> articles = articleRepository.findAll();
         return articles.stream().map(this::convertToListDTO).toList();
@@ -120,7 +126,9 @@ public class ArticleService {
         dto.setPreviewContent(article.getPreviewContent());
         dto.setCreateTime(article.getCreateTime());
 
-        AuthorDto authorDto = new AuthorDto(article.getAuthor().getId(), article.getAuthor().getUsername());
+        AuthorDto authorDto = new AuthorDto(article.getAuthor().getId(),
+                                            article.getAuthor().getUsername(),
+                                            article.getAuthor().getAvatarUrl());
         dto.setAuthor(authorDto);
 
         List<String> tagNames = article.getTags().stream().map(Tag::getName).toList();
@@ -136,7 +144,9 @@ public class ArticleService {
         dto.setCreateTime(article.getCreateTime());
         dto.setUpdateTime(article.getUpdateTime());
 
-        AuthorDto authorDto = new AuthorDto(article.getAuthor().getId(), article.getAuthor().getUsername());
+        AuthorDto authorDto = new AuthorDto(article.getAuthor().getId(),
+                                            article.getAuthor().getUsername(),
+                                            article.getAuthor().getAvatarUrl());
         dto.setAuthor(authorDto);
 
         List<String> tagNames = article.getTags().stream().map(Tag::getName).toList();

@@ -1,6 +1,5 @@
 package com.example.quizz_b.model.dto;
 
-import com.example.quizz_b.model.entity.User;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +8,9 @@ import java.util.List;
 public class QuizListDto {
     private Long id;
     private String authorName;
+    private String avatarUrl;
     private Integer quizType;
     private String title;
     private List<String> tags;
+    private QuizStatsDto quizStats;
 }

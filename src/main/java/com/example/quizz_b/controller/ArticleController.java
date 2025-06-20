@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,7 +40,6 @@ public class ArticleController {
             }
     }
 
-    @Transactional
     @GetMapping("")
     public ResponseEntity<ApiResponse<List<ArticleListDto>>> getAllArticle() {
         try{
