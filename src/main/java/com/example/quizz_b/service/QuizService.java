@@ -1,12 +1,10 @@
 package com.example.quizz_b.service;
 
 import com.example.quizz_b.constant.enums.QuizType;
+import com.example.quizz_b.constant.enums.TagUsageType;
 import com.example.quizz_b.factory.quiz.QuizDtoFactory;
 import com.example.quizz_b.factory.quiz.QuizHandlerFactory;
-import com.example.quizz_b.model.dto.QuizDto;
-import com.example.quizz_b.model.dto.QuizListDto;
-import com.example.quizz_b.model.dto.QuizRecordRequestDto;
-import com.example.quizz_b.model.dto.QuizSubmitRequestDto;
+import com.example.quizz_b.model.dto.*;
 import com.example.quizz_b.model.entity.*;
 import com.example.quizz_b.repository.QuizRecordRepository;
 import com.example.quizz_b.repository.QuizRepository;
@@ -49,6 +47,8 @@ public class QuizService {
         factory.getHandler(type).validate(dto);
 
         Set<Tag> tags = tagService.getOrCreateTags(dto.getTags());
+        tags.forEach(tag -> tagService.recordTagUsage(tag.getName(), TagUsageType.QUIZ));
+
         Quiz quiz = new Quiz();
         quiz.setAuthor(user);
         quiz.setQuizType(type);
@@ -116,8 +116,12 @@ public class QuizService {
         QuizListDto dto = new QuizListDto();
         dto.setId(quiz.getId());
         dto.setAuthorName(quiz.getAuthor().getUsername());
+        dto.setAvatarUrl(quiz.getAuthor().getAvatarUrl());
         dto.setQuizType(quiz.getQuizType().ordinal());
         dto.setTitle(quiz.getTitle());
+
+        QuizStatsDto stats = getQuizStats(quiz.getId());
+        dto.setQuizStats(stats);
 
         List<String> tagNames = quiz.getTags()
                 .stream()
@@ -202,7 +206,7 @@ public class QuizService {
                 .toList();
     }
 
-    public Map<String, Object> recordAnswer(QuizRecordRequestDto request, Long userId) {
+    public QuizStatsDto recordAnswer(QuizRecordRequestDto request, Long userId) {
         Quiz quiz = quizRepository.findById(request.getQuizId())
                 .orElseThrow(() -> new RuntimeException("找不到該題目"));
 
@@ -217,17 +221,15 @@ public class QuizService {
 
         quizRecordRepository.save(record);
 
-        Long total = quizRecordRepository.countByQuizId(quiz.getId());
-        Long correct = quizRecordRepository.countByQuizIdAndIsCorrectTrue(quiz.getId());
+        return getQuizStats(quiz.getId());
+    }
 
+    public QuizStatsDto getQuizStats(Long quizId) {
+        Long total = quizRecordRepository.countByQuizId(quizId);
+        Long correct = quizRecordRepository.countByQuizIdAndIsCorrectTrue(quizId);
         double rate = (total == 0) ? 0.0 : (double) correct / total;
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("totalCount", total);
-        result.put("correctCount", correct);
-        result.put("correctRate", rate);
-
-        return result;
+        return new QuizStatsDto(total, correct, rate);
     }
 
     @Transactional

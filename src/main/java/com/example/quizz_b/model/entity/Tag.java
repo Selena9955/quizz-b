@@ -48,6 +48,9 @@ public class Tag {
     private long countArticle = 0;
 
     @Column(nullable = false)
-    private long countQuizzes= 0;
+    private long countQuiz= 0;
+
+    @Column(nullable = false)
+    private Integer countSearch = 0;
 
 }

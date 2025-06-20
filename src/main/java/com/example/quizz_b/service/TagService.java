@@ -1,10 +1,12 @@
 package com.example.quizz_b.service;
 
+import com.example.quizz_b.constant.enums.TagUsageType;
 import com.example.quizz_b.model.dto.TagDetailDto;
 import com.example.quizz_b.model.dto.TagDto;
 import com.example.quizz_b.model.entity.Tag;
 import com.example.quizz_b.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -17,6 +19,9 @@ import java.util.stream.Collectors;
 public class TagService {
     @Autowired
     private TagRepository tagRepository;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     public List<TagDetailDto> getAllTags(){
         List<Tag> tags = tagRepository.findAll();
@@ -54,7 +59,7 @@ public class TagService {
         tagDto.setId(tag.getId());
         tagDto.setName(tag.getName());
         tagDto.setCountArticles(tag.getCountArticle());
-        tagDto.setCountQuizzes(tag.getCountQuizzes());
+        tagDto.setCountQuizzes(tag.getCountQuiz());
 
         return tagDto;
     }
@@ -64,6 +69,15 @@ public class TagService {
                 .stream()
                 .map(this::convertToDetailDto)
                 .toList();
+    }
+
+    private String getRedisKey(TagUsageType type) {
+        return "tag_usage:" + type.name().toLowerCase();
+    }
+
+    public void recordTagUsage(String tagName, TagUsageType type) {
+        String key = getRedisKey(type);
+        redisTemplate.opsForHash().increment(key, tagName, 1);
     }
 }
 

@@ -26,6 +26,12 @@ public class SearchService {
 
     public void saveSearchKeyword(Long userId, String keyword) {
         String key = KEY_PREFIX + userId;
+
+        List<String> existingKeywords = redisTemplate.opsForList().range(key, 0, 19);
+        if (existingKeywords != null && existingKeywords.contains(keyword)) {
+            return; // 已存在，不紀錄
+        }
+
         redisTemplate.opsForList().leftPush(key, keyword);
         redisTemplate.opsForList().trim(key, 0, 19); // 只保留最近 20 筆
     }
