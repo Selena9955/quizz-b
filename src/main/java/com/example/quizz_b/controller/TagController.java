@@ -1,13 +1,12 @@
 package com.example.quizz_b.controller;
 
 import com.example.quizz_b.model.dto.TagDetailDto;
+import com.example.quizz_b.model.dto.TagDto;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,5 +25,18 @@ public class TagController {
             } catch (RuntimeException ex) {
                 return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
             }
+    }
+
+    @PostMapping("/home-hot")
+    public ResponseEntity<ApiResponse<Void>> updateHomeHotTags(@RequestBody List<String> tagNames) {
+        tagService.updateHomeHotTags(tagNames);
+        return ResponseEntity.ok(ApiResponse.success("更新成功", null));
+    }
+
+    @GetMapping("/home-hot")
+    public ResponseEntity<ApiResponse<List<TagDto>>> getHomeHotTags() {
+        List<TagDto> dtos =  tagService.getHomeHotTags();
+        System.out.println(dtos);
+        return ResponseEntity.ok(ApiResponse.success("取得成功", dtos));
     }
 }

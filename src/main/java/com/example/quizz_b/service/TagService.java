@@ -5,6 +5,7 @@ import com.example.quizz_b.model.dto.TagDetailDto;
 import com.example.quizz_b.model.dto.TagDto;
 import com.example.quizz_b.model.entity.Tag;
 import com.example.quizz_b.repository.TagRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -65,11 +66,35 @@ public class TagService {
         return tagDto;
     }
 
+    private TagDto convertToDto(Tag tag){
+        TagDto tagDto = new TagDto();
+        tagDto.setId(tag.getId());
+        tagDto.setName(tag.getName());
+
+        return tagDto;
+    }
+
     public List<TagDetailDto> searchByName(String keyword) {
         return tagRepository.findByNameContainingIgnoreCase(keyword)
                 .stream()
                 .map(this::convertToDetailDto)
                 .toList();
+    }
+
+    @Transactional
+    public void updateHomeHotTags(List<String> tagNames) {
+        // 清除所有已有的 homeHotOrder
+        tagRepository.clearHomeHotOrder(); // 將欄位設為 null
+
+        // 根據傳入順序更新
+        for (int i = 0; i < tagNames.size(); i++) {
+            tagRepository.updateHomeHotOrderByName(tagNames.get(i), i);
+        }
+    }
+
+    public List<TagDto> getHomeHotTags() {
+        List<Tag> tags = tagRepository.findByHomeHotOrderIsNotNullOrderByHomeHotOrderAsc();
+        return tags.stream().map(this::convertToDto).toList();
     }
 
     // 寫入 Redis
@@ -92,7 +117,7 @@ public class TagService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "請同時提供 startDate 和 endDate，或全部不填");
         }
 
-        // ✅ 如果都沒提供，找出 Redis 中最早和最晚日期來查詢
+        // 如果都沒提供，找出 Redis 中最早和最晚日期來查詢
         return getByAllAvailableDates(type, limit);
     }
 

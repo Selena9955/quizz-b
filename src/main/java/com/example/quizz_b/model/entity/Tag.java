@@ -53,4 +53,6 @@ public class Tag {
     @Column(nullable = false)
     private Integer countSearch = 0;
 
+    @Column(name = "home_hot_order")
+    private Integer homeHotOrder;
 }
