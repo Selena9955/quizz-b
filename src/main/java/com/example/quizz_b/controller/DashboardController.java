@@ -4,18 +4,19 @@ import com.example.quizz_b.constant.enums.TagUsageType;
 import com.example.quizz_b.model.dto.AdminUserDto;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.AdminUserService;
+import com.example.quizz_b.service.TagService;
 import com.example.quizz_b.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/db")
@@ -25,10 +26,18 @@ public class DashboardController {
     private AdminUserService adminUserService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private TagService tagService;
 
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @GetMapping({"", "/"})
+    public String testAdmin() {
+        return "admin ok";
+    }
 
     @GetMapping("/users")
     public ResponseEntity<ApiResponse< List<AdminUserDto> >> getAllUsers() {
@@ -49,19 +58,15 @@ public class DashboardController {
     }
 
     @GetMapping("/tag-usage")
-    public ResponseEntity<Map<String, Integer>> getTagUsage(
-            @RequestParam TagUsageType type
+    public ResponseEntity<List<Map<String, Object>>> getTagUsage(
+            @RequestParam(value = "type", required = false, defaultValue = "ALL") TagUsageType type,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "limit", required = false) Integer limit
     ) {
-        String key = "tag_usage:" + type.name().toLowerCase();
-        Map<Object, Object> redisData = redisTemplate.opsForHash().entries(key);
-
-        Map<String, Integer> result = redisData.entrySet().stream()
-                .collect(Collectors.toMap(
-                        e -> e.getKey().toString(),
-                        e -> Integer.parseInt(e.getValue().toString())
-                ));
-
-        return ResponseEntity.ok(result);
+        System.out.printf("%s %s %s %n",type, startDate, endDate, limit);
+        List<Map<String, Object>> usageStats = tagService.getTagUsageStats(type, startDate, endDate, limit);
+        return ResponseEntity.ok(usageStats);
     }
 
 }

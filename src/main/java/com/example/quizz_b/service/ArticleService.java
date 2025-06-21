@@ -52,7 +52,7 @@ public class ArticleService {
                     return tag;
                 }
         ).collect(Collectors.toSet());
-        tags.forEach(tag -> tagService.recordTagUsage(tag.getName(), TagUsageType.QUIZ));
+        tags.forEach(tag -> tagService.recordTagUsage(tag.getName(), TagUsageType.ARTICLE));
 
         Article article = new Article();
         article.setTitle(request.getTitle());

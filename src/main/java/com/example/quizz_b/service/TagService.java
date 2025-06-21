@@ -7,12 +7,13 @@ import com.example.quizz_b.model.entity.Tag;
 import com.example.quizz_b.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,13 +72,97 @@ public class TagService {
                 .toList();
     }
 
-    private String getRedisKey(TagUsageType type) {
-        return "tag_usage:" + type.name().toLowerCase();
+    // 寫入 Redis
+    public void recordTagUsage(String tagName, TagUsageType type) {
+        String date = LocalDate.now().toString(); // e.g. "2024-06-26"
+        String key = "tag_usage:" + type.name().toLowerCase() + ":" + date;
+        redisTemplate.opsForHash().increment(key, tagName, 1);
     }
 
-    public void recordTagUsage(String tagName, TagUsageType type) {
-        String key = getRedisKey(type);
-        redisTemplate.opsForHash().increment(key, tagName, 1);
+    // 從 redis取得使用次數
+    public List<Map<String, Object>> getTagUsageStats(TagUsageType type,
+                                                      LocalDate startDate,
+                                                      LocalDate endDate,
+                                                      Integer limit) {
+        if (startDate != null && endDate != null) {
+            return getByDateRange(type, startDate, endDate, limit);
+        }
+
+        if (startDate != null || endDate != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "請同時提供 startDate 和 endDate，或全部不填");
+        }
+
+        // ✅ 如果都沒提供，找出 Redis 中最早和最晚日期來查詢
+        return getByAllAvailableDates(type, limit);
+    }
+
+    private List<Map<String, Object>> getByAllAvailableDates(TagUsageType type, Integer limit) {
+        List<TagUsageType> types = (type == TagUsageType.ALL)
+                ? List.of(TagUsageType.SEARCH, TagUsageType.ARTICLE, TagUsageType.QUIZ)
+                : List.of(type);
+
+        Set<String> keys = new HashSet<>();
+        for (TagUsageType t : types) {
+            keys.addAll(redisTemplate.keys("tag_usage:" + t.name().toLowerCase() + ":*"));
+        }
+
+        TreeSet<LocalDate> allDates = new TreeSet<>();
+        for (String key : keys) {
+            String[] parts = key.split(":");
+            if (parts.length == 3) {
+                try {
+                    LocalDate date = LocalDate.parse(parts[2]);
+                    allDates.add(date);
+                } catch (DateTimeParseException ignored) {}
+            }
+        }
+
+        if (allDates.isEmpty()) {
+            return List.of();
+        }
+
+        LocalDate startDate = allDates.first();
+        LocalDate endDate = allDates.last();
+
+        return getByDateRange(type, startDate, endDate, limit);
+    }
+
+
+    private List<Map<String, Object>> getByDateRange(TagUsageType type, LocalDate start, LocalDate end, Integer limit) {
+        Map<String, Integer> tagCountMap = new HashMap<>();
+
+        List<TagUsageType> types = (type == TagUsageType.ALL)
+                ? List.of(TagUsageType.SEARCH, TagUsageType.ARTICLE, TagUsageType.QUIZ)
+                : List.of(type);
+
+        for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+            for (TagUsageType t : types) {
+                String key = "tag_usage:" + t.name().toLowerCase() + ":" + date;
+                Map<Object, Object> redisData = redisTemplate.opsForHash().entries(key);
+
+                for (var entry : redisData.entrySet()) {
+                    tagCountMap.merge(entry.getKey().toString(),
+                            Integer.parseInt(entry.getValue().toString()),
+                            Integer::sum);
+                }
+            }
+        }
+
+        return toSortedTagList(tagCountMap, limit);
+    }
+
+    // 排序並格式化為 List<Map>
+    private List<Map<String, Object>> toSortedTagList(Map<String, Integer> tagCountMap, Integer limit) {
+        return tagCountMap.entrySet().stream()
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+                .limit(limit != null ? limit : Long.MAX_VALUE)
+                .map(entry -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("name", entry.getKey());
+                    map.put("value", entry.getValue());
+                    return map;
+                })
+                .toList();
     }
 }
 
