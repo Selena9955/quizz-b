@@ -129,4 +129,23 @@ public class JwtUtil {
 
         throw new RuntimeException("JWT token 未提供");
     }
+
+    // 從 cookie 中拿到 token：允許未登入的版本，token 不存在就回傳 null，不拋例外
+    public String extractTokenIfPresent(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        return null; // ✅ 回傳 null，不拋錯
+    }
+
 }

@@ -41,10 +41,7 @@ public class SearchService {
         return redisTemplate.opsForList().range(key, 0, 19);
     }
 
-    public SearchResultDto search(SearchQueryDto query) {
-        String keyword = query.getQ();
-        Integer type = query.getType() ;
-        Long userId = query.getUserId();
+    public SearchResultDto search(String keyword, Integer type, Long userId) {
 
         if (type == null) {
             type = 0; // 預設為查 quiz

@@ -2,6 +2,7 @@ package com.example.quizz_b.repository;
 
 import com.example.quizz_b.constant.enums.QuizType;
 import com.example.quizz_b.model.entity.Quiz;
+import com.example.quizz_b.repository.custom.QuizRepositoryCustom;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface QuizRepository extends JpaRepository<Quiz,Long> {
+public interface QuizRepository extends JpaRepository<Quiz,Long> , QuizRepositoryCustom {
     @EntityGraph(attributePaths = {"tags", "author", "options"})
     List<Quiz> findAllByOrderByCreateTimeDesc();
 

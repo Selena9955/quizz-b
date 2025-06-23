@@ -1,6 +1,5 @@
 package com.example.quizz_b.controller;
 
-import com.example.quizz_b.model.dto.SearchQueryDto;
 import com.example.quizz_b.model.dto.SearchResultDto;
 import com.example.quizz_b.response.ApiResponse;
 import com.example.quizz_b.service.SearchService;
@@ -28,15 +27,13 @@ public class SearchController {
     public ResponseEntity<ApiResponse<SearchResultDto>> search(@RequestParam("q") String keyword,
                                                                @RequestParam(value = "type", required = false) Integer type,
                                                                HttpServletRequest request) {
-        String token = jwtUtil.extractTokenFromRequest(request);
-        Long userId = jwtUtil.extractUserId(token);
+        String token = jwtUtil.extractTokenIfPresent(request);
 
-        SearchQueryDto query = new SearchQueryDto();
-        query.setQ(keyword);
-        query.setType(type);
-        query.setUserId(userId);
-
-        SearchResultDto dto = searchService.search(query);
+        Long userId = null;
+        if (token != null && !token.isBlank()) {
+            userId = jwtUtil.extractUserId(token);
+        }
+        SearchResultDto dto = searchService.search(keyword,type,userId);
         System.out.println(dto);
         return ResponseEntity.ok(ApiResponse.success("搜尋成功", dto));
     }

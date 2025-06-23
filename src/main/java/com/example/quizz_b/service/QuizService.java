@@ -198,10 +198,13 @@ public class QuizService {
         return quizRepository.countByAuthorId(id);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<QuizListDto> searchByTitle(String keyword) {
-        return quizRepository.findByTitleContainingIgnoreCaseAndIsDeleteFalse(keyword)
-                .stream()
+        if (keyword == null || keyword.isBlank()) return Collections.emptyList();
+
+        String[] keywords = keyword.trim().split("\\s+"); // 切分多關鍵字
+
+        return quizRepository.searchByMultipleKeywords(keywords).stream()
                 .map(this::convertToListDTO)
                 .toList();
     }

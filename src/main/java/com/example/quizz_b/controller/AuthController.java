@@ -87,11 +87,11 @@ public class AuthController {
             // 設 Cookie
             if (isVerified) {
                 ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                        .httpOnly(true)
-                        .secure(false) // https 本地測試用 false，正式環境改 true
-                        .path("/") // 網域範圍為全部
+                        .httpOnly(true) // 阻止 JavaScript 存取 cookie，防止 XSS 攻擊
+                        .secure(false) // true => 只能在 HTTPS 連線下傳送
+                        .path("/") // cookie有效網域範圍為全部
                         .maxAge(24 * 60 * 60) // Cookie 的存活時間 - 24hr
-                        .sameSite("Lax") // 防止跨站請求偽造（CSRF）的一種設定
+                        .sameSite("Lax") // 防止跨站請求偽造（CSRF），登入後跳轉仍可保持 cookie
                         .build(); // 完成，建立 Cookie
                 response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
