@@ -248,4 +248,31 @@ public class QuizService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到題目"));
         return quiz.getTags();
     }
+
+    @Transactional
+    public QuizUserRecordDto getUserRecord(Long userId) {
+        Long total = quizRecordRepository.countByUserId(userId);
+        Long correct = quizRecordRepository.countByUserIdAndIsCorrectTrue(userId);
+
+        double correctRate = (total == 0) ? 0.0 : (correct * 100.0 / total);
+
+        List<QuizRecord> recentRecords = quizRecordRepository.findTop3ByUserIdOrderByCreateTimeDesc(userId);
+
+        List<QuizUserRecordDto.RecentQuizDto> recentQuizzes = recentRecords.stream()
+                .map(record -> {
+                    QuizUserRecordDto.RecentQuizDto dto = new QuizUserRecordDto.RecentQuizDto();
+                    dto.setId(record.getQuiz().getId());
+                    dto.setTitle(record.getQuiz().getTitle());
+                    return dto;
+                })
+                .toList();
+
+        QuizUserRecordDto result = new QuizUserRecordDto();
+        result.setTotalCount(total.intValue());
+        result.setCorrectCount(correct.intValue());
+        result.setCorrectRate(Math.round(correctRate * 10.0) / 10.0); // 保留一位小數
+        result.setRecentQuizzes(recentQuizzes);
+
+        return result;
+    }
 }

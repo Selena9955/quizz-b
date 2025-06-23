@@ -103,5 +103,18 @@ public class QuizController {
         return ResponseEntity.ok(ApiResponse.success("答題記錄完成", data));
     }
 
+    @GetMapping("/UserRecord")
+    public ResponseEntity<ApiResponse<QuizUserRecordDto>> getUserRecord(HttpServletRequest request) {
+        try{
+            String token = jwtUtil.extractTokenFromRequest(request);
+            Long userId = jwtUtil.extractUserId(token);
+
+            QuizUserRecordDto dto = quizService.getUserRecord(userId);
+            return ResponseEntity.ok(ApiResponse.success("取得成功", dto));
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
+        }
+    }
+
 
 }
