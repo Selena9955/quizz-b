@@ -189,5 +189,14 @@ public class TagService {
                 })
                 .toList();
     }
+
+    // 記錄從搜尋來的使用次數
+    public void recordSearchTags(List<String> tags) {
+        if (tags == null || tags.isEmpty()) return;
+        System.out.println("redis:search 紀錄");
+        for (String tag : tags) {
+            recordTagUsage(tag, TagUsageType.SEARCH);
+        }
+    }
 }
 

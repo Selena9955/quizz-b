@@ -242,4 +242,10 @@ public class QuizService {
                 .map(this::convertToListDTO)
                 .toList();
     }
+
+    public Set<Tag> findTagsByQuizId(Long quizId) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到題目"));
+        return quiz.getTags();
+    }
 }

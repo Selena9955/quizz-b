@@ -13,8 +13,10 @@ import com.example.quizz_b.repository.TagRepository;
 import com.example.quizz_b.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Set;
@@ -174,6 +176,12 @@ public class ArticleService {
                 .stream()
                 .map(this::convertToListDTO)
                 .toList();
+    }
+
+    public Set<Tag> findTagsByArticleId(Long articleId) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "找不到文章"));
+        return article.getTags();
     }
 }
 

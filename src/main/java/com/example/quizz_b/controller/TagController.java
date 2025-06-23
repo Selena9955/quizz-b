@@ -39,4 +39,10 @@ public class TagController {
         System.out.println(dtos);
         return ResponseEntity.ok(ApiResponse.success("取得成功", dtos));
     }
+
+    @PostMapping("/record-search")
+    public ResponseEntity<ApiResponse<Void>> recordSearchTag(@RequestBody List<String> tags) {
+        tagService.recordSearchTags(tags);
+        return ResponseEntity.ok(ApiResponse.success("取得成功", null));
+    }
 }
