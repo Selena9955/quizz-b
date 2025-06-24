@@ -13,6 +13,7 @@ import com.example.quizz_b.repository.TagRepository;
 import com.example.quizz_b.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +69,7 @@ public class ArticleService {
 
     @Transactional
     public List<ArticleListDto> getAllArticles() {
-        List<Article> articles = articleRepository.findAll();
+        List<Article> articles = articleRepository.findAll(Sort.by(Sort.Direction.DESC, "createTime"));
         return articles.stream().map(this::convertToListDTO).toList();
     }
 
