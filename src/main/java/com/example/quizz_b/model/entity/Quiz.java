@@ -62,6 +62,7 @@ public class Quiz {
     // 選項-單選題、多選題
     @ToString.Exclude
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderColumn(name = "position")
     private List<QuizOption> options = new ArrayList<>();
 
     // 解答-單選題
