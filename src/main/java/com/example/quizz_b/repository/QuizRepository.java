@@ -40,4 +40,29 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> , QuizRepositor
 
     @Query(value = "SELECT * FROM quiz ORDER BY create_time DESC LIMIT :limit", nativeQuery = true)
     List<Quiz> findLatest(@Param("limit") int limit);
+
+    // @Query("""
+    // SELECT q FROM Quiz q
+    // JOIN q.tags t
+    // WHERE t.name IN :inputTags
+    // GROUP BY q
+    // ORDER BY COUNT(t) DESC, q.createTime DESC
+    // """)
+    // List<Quiz> findRelatedQuizzes(@Param("inputTags") List<String> inputTags, Pageable pageable);
+
+    @Query("""
+    SELECT q FROM Quiz q
+    JOIN q.tags t
+    WHERE t.name IN :inputTags
+      AND (:excludeId IS NULL OR q.id <> :excludeId)
+    GROUP BY q
+    ORDER BY COUNT(t) DESC, q.createTime DESC
+    """)
+    List<Quiz> findRelatedQuizzes(
+            @Param("inputTags") List<String> inputTags,
+            @Param("excludeId") Long excludeId,
+            Pageable pageable
+    );
+
+
 }

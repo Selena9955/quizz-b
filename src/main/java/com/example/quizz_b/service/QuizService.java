@@ -275,4 +275,23 @@ public class QuizService {
 
         return result;
     }
+
+    @Transactional
+    public List<QuizListDto> getRecommendByTags(QuizRecommendRequest request) {
+        List<TagDto> tags = request.getTags();
+        Long quizId = request.getExcludeId();
+
+        Pageable top5 = PageRequest.of(0, 5);
+
+        List<String> tagNames = tags.stream()
+                .map(TagDto::getName)
+                .toList();
+        System.out.println(tagNames);
+
+        List<Quiz> quizzes = quizRepository.findRelatedQuizzes(tagNames,quizId, top5);
+
+        return quizzes.stream()
+                .map(this::convertToListDTO)
+                .toList();
+    }
 }

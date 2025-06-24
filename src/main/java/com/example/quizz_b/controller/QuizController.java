@@ -116,5 +116,11 @@ public class QuizController {
         }
     }
 
+    @PostMapping("/recommend")
+    public ResponseEntity<ApiResponse<List<QuizListDto>>> getRecommend(@RequestBody QuizRecommendRequest request) {
+        List<QuizListDto> dtos = quizService.getRecommendByTags(request);
+        return ResponseEntity.ok(ApiResponse.success("取得相關題目成功", dtos));
+    }
+
 
 }
