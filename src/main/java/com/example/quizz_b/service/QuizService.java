@@ -189,7 +189,7 @@ public class QuizService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("使用者不存在"));
 
-        List<Quiz> quizzes = quizRepository.findByAuthorId(user.getId());
+        List<Quiz> quizzes = quizRepository.findByAuthorIdAndIsDeleteFalse(user.getId());
         return quizzes.stream().map(this::convertToListDTO).toList();
     }
 

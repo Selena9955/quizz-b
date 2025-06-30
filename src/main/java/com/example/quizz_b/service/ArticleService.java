@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,7 +70,7 @@ public class ArticleService {
 
     @Transactional
     public List<ArticleListDto> getAllArticles() {
-        List<Article> articles = articleRepository.findAll(Sort.by(Sort.Direction.DESC, "createTime"));
+        List<Article> articles = articleRepository.findByIsDeleteFalse(Sort.by(Sort.Direction.DESC, "createTime"));
         return articles.stream().map(this::convertToListDTO).toList();
     }
 
@@ -79,7 +80,7 @@ public class ArticleService {
         return convertToDetailDTO(article);
     }
 
-    public void delete(Long articleId, Long userId) {
+    public void hardDeleteArticleById(Long articleId, Long userId) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new RuntimeException("找不到文章"));
 
@@ -88,6 +89,18 @@ public class ArticleService {
         }
 
         articleRepository.delete(article);
+    }
+
+    public void softDeleteArticleById(Long articleId, Long userId) throws AccessDeniedException {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new RuntimeException("找不到文章"));
+
+        // TODO: 支援管理員可跳過作者驗證邏輯，允許硬刪除
+        if (!article.getAuthor().getId().equals(userId)) {
+            throw new AccessDeniedException("無權限刪除該資料");
+        }
+        article.setDelete(true);
+        articleRepository.save(article);
     }
 
     public void update(Long articleId, @Valid ArticleCreateRequestDto body, User user) {
@@ -162,7 +175,7 @@ public class ArticleService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("使用者不存在"));
 
-        List<Article> articles = articleRepository.findByAuthorId(user.getId());
+        List<Article> articles = articleRepository.findByAuthorIdAndIsDeleteFalse(user.getId());
         return articles.stream().map(this::convertToListDTO).toList();
     }
 

@@ -44,7 +44,7 @@ public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // 密碼加密器
+    // 密碼雜湊處理
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public void createUser(String username, String password, String email) {

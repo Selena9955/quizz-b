@@ -56,4 +56,7 @@ public class Article {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
+
+    @Column(name = "is_delete")
+    private boolean isDelete  = false;
 }

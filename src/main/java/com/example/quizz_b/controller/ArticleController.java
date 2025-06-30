@@ -65,7 +65,7 @@ public class ArticleController {
             String token = jwtUtil.extractTokenFromRequest(request);
             Long userId = jwtUtil.extractUserId(token);
 
-            articleService.delete(id,userId);
+            articleService.softDeleteArticleById(id,userId);
             return ResponseEntity.ok(ApiResponse.success("刪除成功", null));
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(400,ex.getMessage()));
